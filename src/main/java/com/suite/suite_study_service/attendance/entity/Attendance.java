@@ -2,10 +2,8 @@ package com.suite.suite_study_service.attendance.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.util.Times;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.sql.Timestamp;
 
 @Entity

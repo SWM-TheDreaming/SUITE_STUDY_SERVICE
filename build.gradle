@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.6.7'
+    id 'org.springframework.boot' version '2.7.14'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
@@ -17,38 +17,29 @@ configurations {
 repositories {
     mavenCentral()
 }
-
-ext {
-    set('springCloudVersion', "2021.0.0")
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.projectlombok:lombok:1.18.26'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.7.8'
     //json
-    implementation 'com.google.code.gson:gson:2.7'
-    implementation 'commons-io:commons-io:2.6'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     //sql
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
-    //config
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    //security && JWT
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
     //actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    //openfeign
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    //kafka
+    implementation 'org.springframework.kafka:spring-kafka:2.8.5'
+
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
 
 tasks.named('test') {
     useJUnitPlatform()
