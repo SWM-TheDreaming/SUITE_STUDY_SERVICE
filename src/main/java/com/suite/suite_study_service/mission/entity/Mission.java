@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.mission.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,4 +35,15 @@ public class Mission {
 
     @Column(name = "result")
     private boolean result;
+
+    @Builder
+    public Mission(Long missionId, Long suiteRoomId, Long memberId, String missionName, Timestamp missionDeadLine, String missionStatus, boolean result) {
+        this.missionId = missionId;
+        this.suiteRoomId = suiteRoomId;
+        this.memberId = memberId;
+        this.missionName = missionName;
+        this.missionDeadLine = missionDeadLine;
+        this.missionStatus = missionStatus;
+        this.result = result;
+    }
 }

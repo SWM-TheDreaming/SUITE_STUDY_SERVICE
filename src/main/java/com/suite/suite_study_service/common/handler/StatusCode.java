@@ -23,7 +23,7 @@ public enum StatusCode {
     EXPIRED_JWT(400, "기존 토큰이 만료되었습니다. 해당 토큰을 가지고 /token/refresh 링크로 이동 후 토큰을 재발급 받으세요.", HttpStatus.UNAUTHORIZED),
     RE_LOGIN(400, "모든 토큰이 만료되었습니다. 다시 로그인해주세요.", HttpStatus.UNAUTHORIZED),
     FAILED_SIGNUP(400, "회원가입에 실패하였습니다.", HttpStatus.BAD_REQUEST),
-
+    IS_NOT_PARTICIPATED(400, "스위트룸에 참가한 유저가 아닙니다.", HttpStatus.BAD_REQUEST),
     REGISTERED_EMAIL(400, "등록된 회원입니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND(404, "일치하는 정보가 없습니다.", HttpStatus.NOT_FOUND),
     FAILED_REQUEST(400, "요청에 실패하였습니다.", HttpStatus.BAD_REQUEST),
