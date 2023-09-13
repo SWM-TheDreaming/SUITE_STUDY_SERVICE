@@ -33,6 +33,7 @@ public class MissionServiceImpl implements MissionService{
                 .orElseThrow(() -> new CustomException(StatusCode.IS_NOT_PARTICIPATED));
         if(!isInDashBoard.isHost()) throw new CustomException(StatusCode.FORBIDDEN);
 
+
         dashBoardRepository.findAllBySuiteRoomId(reqMissionDto.getSuiteRoomId())
                 .stream()
                 .forEach(dashBoard -> {
