@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.mission.mockEntity;
 
+import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.Mission;
 import lombok.Builder;
 import org.mockito.Mock;
@@ -16,11 +17,11 @@ public class MockMission {
     private Long memberId;
     private String missionName;
     private Timestamp missionDeadLine;
-    private String missionStatus;
+    private MissionType missionStatus;
     private boolean result;
 
     @Builder
-    public MockMission(Long suiteRoomId, Long memberId, String missionName, String missionDeadLine, String missionStatus, boolean result) {
+    public MockMission(Long suiteRoomId, Long memberId, String missionName, String missionDeadLine, MissionType missionStatus, boolean result) {
         this.suiteRoomId = suiteRoomId;
         this.memberId = memberId;
         this.missionName = missionName;
@@ -42,7 +43,7 @@ public class MockMission {
 
     private static Timestamp getTimeStamp(String time) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime localDateTime = LocalDateTime.parse("2023-08-23 12:57:23", formatter);
+        LocalDateTime localDateTime = LocalDateTime.parse(time, formatter);
         ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"));
         return Timestamp.from(zonedDateTime.toInstant());
     }

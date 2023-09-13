@@ -6,6 +6,7 @@ import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
+import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.mockEntity.MockAuthorizer;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
@@ -53,7 +54,7 @@ public class MissionServiceTest {
 
     @Test
     @DisplayName("스터디 그룹 미션 생성 - 방장 O")
-    public void createSuiteRoomHost() {
+    public void createMissionHost() {
         //given
         AuthorizerDto missionCreationAttempter = MockAuthorizer.YH();
         //when
@@ -71,7 +72,7 @@ public class MissionServiceTest {
             });
         }
 
-        makeMockMissionList("test", "2023-10-25 18:00:00")
+        makeMockMissionList("test", "2023-10-15 18:00:00")
                 .stream()
                 .forEach(mockMission -> {
                             missionRepository.save(mockMission.toMission());
@@ -81,18 +82,18 @@ public class MissionServiceTest {
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
                 ()-> assertThat(assertionMissions.size()).isEqualTo(3),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo("PROGRESS"),
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS),
                 ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
         );
     }
 
     @Test
     @DisplayName("스터디 그룹 미션 생성 - 방장 X")
-    public void createSuiteRoomGuest() {
+    public void createMissionGuest() {
         //given
         AuthorizerDto missionCreationAttempter = MockAuthorizer.DH();
         //when
-        dashBoardRepository.findByMemberId(missionCreationAttempter.getMemberId()).orElseThrow(
+        DashBoard dashBoard = dashBoardRepository.findByMemberId(missionCreationAttempter.getMemberId()).orElseThrow(
                 () -> {
                     //then
                     return assertThrows(CustomException.class, () -> {
@@ -100,6 +101,14 @@ public class MissionServiceTest {
                     });
                 }
         );
+
+        if(!dashBoard.isHost()) {
+            assertThrows(CustomException.class, () -> {
+                throw new CustomException(StatusCode.FORBIDDEN);
+            });
+        }
+
+
 
     }
 
@@ -112,7 +121,7 @@ public class MissionServiceTest {
                     .memberId(dashBoard.getMemberId())
                     .missionName(missionName)
                     .missionDeadLine(missionDeadLine)
-                    .missionStatus("PROGRESS")
+                    .missionStatus(MissionType.PROGRESS)
                     .result(false)
                     .build();
             mockMissionList.add(mockMission);

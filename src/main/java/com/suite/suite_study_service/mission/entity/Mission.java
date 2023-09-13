@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.mission.entity;
 
+import com.suite.suite_study_service.mission.dto.MissionType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,14 +31,15 @@ public class Mission {
     @Column(name = "mission_dead_line")
     private Timestamp missionDeadLine;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "mission_status")
-    private String missionStatus;
+    private MissionType missionStatus;
 
     @Column(name = "result")
     private boolean result;
 
     @Builder
-    public Mission(Long missionId, Long suiteRoomId, Long memberId, String missionName, Timestamp missionDeadLine, String missionStatus, boolean result) {
+    public Mission(Long missionId, Long suiteRoomId, Long memberId, String missionName, Timestamp missionDeadLine, MissionType missionStatus, boolean result) {
         this.missionId = missionId;
         this.suiteRoomId = suiteRoomId;
         this.memberId = memberId;
