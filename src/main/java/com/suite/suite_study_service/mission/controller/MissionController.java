@@ -3,6 +3,7 @@ package com.suite.suite_study_service.mission.controller;
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
+import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.service.MissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,11 @@ public class MissionController {
         missionService.createMission(reqMissionDto);
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
+
+    @PostMapping("/mission")
+    public ResponseEntity<Message> listUpMissions(@RequestBody ReqMissionListDto reqMissionListDto) {
+        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.listUpMission(reqMissionListDto.getSuiteRoomId(), reqMissionListDto.getMissionTypeString())));
+    }
+
 
 }

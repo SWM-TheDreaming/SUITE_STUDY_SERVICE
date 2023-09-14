@@ -5,6 +5,7 @@ import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
+import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -40,5 +41,15 @@ public class MissionServiceImpl implements MissionService{
                     Mission mission = reqMissionDto.toMission(dashBoard.getMemberId());
                     missionRepository.save(mission);
                 });
+    }
+
+    @Override
+    public List<Mission> listUpMission(Long suiteRoomId,String missionTypeString) {
+        try {
+            return missionRepository.findAllBySuiteRoomIdAndMissionStatus(suiteRoomId, MissionType.valueOf(missionTypeString));
+        } catch (Exception exception) {
+            throw new CustomException(StatusCode.NOT_FOUND);
+        }
+
     }
 }

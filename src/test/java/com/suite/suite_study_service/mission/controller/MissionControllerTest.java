@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
+import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -69,6 +70,51 @@ public class MissionControllerTest {
         String body = mapper.writeValueAsString(reqMissionDto);
         //when
         String responseBody = postRequest("/study/mission/registration", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - PROGRESS")
+    public void listUpMissionsProgress() throws Exception {
+        //given
+        ReqMissionListDto reqMissionListDto = MockMission.getReqMissionListDto("PROGRESS");
+        String body = mapper.writeValueAsString(reqMissionListDto);
+        //when
+        String responseBody = postRequest("/study/mission", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - CHECKING")
+    public void listUpMissionsChecking() throws Exception {
+        //given
+        ReqMissionListDto reqMissionListDto = MockMission.getReqMissionListDto("CHECKING");
+        String body = mapper.writeValueAsString(reqMissionListDto);
+        //when
+        String responseBody = postRequest("/study/mission", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - COMPLETE")
+    public void listUpMissionsComplete() throws Exception {
+        //given
+        ReqMissionListDto reqMissionListDto = MockMission.getReqMissionListDto("COMPLETE");
+        String body = mapper.writeValueAsString(reqMissionListDto);
+        //when
+        String responseBody = postRequest("/study/mission", YH_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
         //then
         Assertions.assertAll(
