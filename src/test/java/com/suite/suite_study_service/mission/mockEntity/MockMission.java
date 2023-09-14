@@ -2,6 +2,7 @@ package com.suite.suite_study_service.mission.mockEntity;
 
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
+import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import lombok.Builder;
 import org.mockito.Mock;
@@ -47,6 +48,13 @@ public class MockMission {
                 .suiteRoomId(1L)
                 .missionName("test")
                 .missionDeadLine(Timestamp.valueOf("2023-10-15 18:00:00"))
+                .build();
+    }
+
+    public static ReqMissionListDto getReqMissionListDto(String missionTypeString) {
+        return ReqMissionListDto.builder()
+                .suiteRoomId(1L)
+                .missionTypeString(missionTypeString)
                 .build();
     }
 
