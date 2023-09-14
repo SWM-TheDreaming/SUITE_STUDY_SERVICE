@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +71,7 @@ public class MissionServiceTest {
             });
         }
 
-        makeMockMissionList("test", "2023-10-15 18:00:00")
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
                 .stream()
                 .forEach(mockMission -> {
                             missionRepository.save(mockMission.toMission());
@@ -107,12 +106,70 @@ public class MissionServiceTest {
                 throw new CustomException(StatusCode.FORBIDDEN);
             });
         }
+    }
 
-
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - 진행중")
+    public void getMissionsProgress() {
+        //given
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.PROGRESS);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS),
+                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+        );
 
     }
 
-    private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine) {
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - 확인")
+    public void getMissionsCheck() {
+        //given
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.CHECKING),
+                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - 완료")
+    public void getMissionsComplete() {
+        //given
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.COMPLETE);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.COMPLETE),
+                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+        );
+    }
+
+    private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
         List<MockMission> mockMissionList = new ArrayList<>();
         dashBoards.stream().forEach(dashBoard -> {
@@ -121,7 +178,7 @@ public class MissionServiceTest {
                     .memberId(dashBoard.getMemberId())
                     .missionName(missionName)
                     .missionDeadLine(missionDeadLine)
-                    .missionStatus(MissionType.PROGRESS)
+                    .missionStatus(missionType)
                     .result(false)
                     .build();
             mockMissionList.add(mockMission);
