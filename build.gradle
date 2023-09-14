@@ -14,32 +14,51 @@ configurations {
     }
 }
 
+
 repositories {
     mavenCentral()
 }
+
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.projectlombok:lombok:1.18.26'
+    testAnnotationProcessor('org.projectlombok:lombok')
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.7.8'
     //json
+    implementation 'com.google.code.gson:gson:2.7'
+    implementation 'commons-io:commons-io:2.6'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     //sql
     runtimeOnly 'mysql:mysql-connector-java:8.0.25'
     //security && JWT
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    //security && JWT TEST
+    testImplementation 'org.springframework.security:spring-security-test'
+
     //actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0'
+    //spring email
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
 
-    //kafka
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'com.h2database:h2'
+
+    // https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
     implementation 'org.springframework.kafka:spring-kafka:2.8.5'
 
-}
 
+}
 
 tasks.named('test') {
     useJUnitPlatform()
