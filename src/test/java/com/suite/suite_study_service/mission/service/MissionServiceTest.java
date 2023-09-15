@@ -180,7 +180,7 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.COMPLETE);
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomId(1L);
         Timestamp now = new Timestamp(System.currentTimeMillis());
         assertionMissions.stream()
                 .forEach(mission -> {
