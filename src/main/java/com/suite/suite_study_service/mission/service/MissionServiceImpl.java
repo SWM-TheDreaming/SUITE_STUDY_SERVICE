@@ -49,8 +49,9 @@ public class MissionServiceImpl implements MissionService{
     @Override
     public List<Mission> listUpMission(Long suiteRoomId,String missionTypeString) {
         try {
+            AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(suiteRoomId, MissionType.valueOf(missionTypeString))
+            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(suiteRoomId, MissionType.valueOf(missionTypeString), missionReadAttemper.getMemberId())
                     .stream()
                     .filter(mission -> {
 

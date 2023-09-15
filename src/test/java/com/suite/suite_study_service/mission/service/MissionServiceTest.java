@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -118,12 +120,14 @@ public class MissionServiceTest {
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
+        AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.PROGRESS);
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.PROGRESS, missionReadAttempter.getMemberId());
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
+                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
                 ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS),
                 ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
         );
@@ -139,12 +143,14 @@ public class MissionServiceTest {
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
+        AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING);
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.CHECKING, missionReadAttempter.getMemberId());
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
+                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
                 ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.CHECKING),
                 ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
         );
@@ -159,12 +165,14 @@ public class MissionServiceTest {
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
+        AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.COMPLETE);
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missionReadAttempter.getMemberId());
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(3),
+                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
+                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
                 ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.COMPLETE),
                 ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
         );
@@ -174,20 +182,28 @@ public class MissionServiceTest {
     @DisplayName("스터디 그룹 미션 목록 - 기간 만료")
     public void timeOutMissions() {
         //given
+        AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         makeMockMissionList("test", "2023-09-14 18:00:00", MissionType.PROGRESS)
                 .stream()
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomId(1L);
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        assertionMissions.stream()
-                .forEach(mission -> {
-                    if (mission.getMissionDeadLine().getTime() < now.getTime()); {
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.valueOf("PROGRESS"), missionReadAttempter.getMemberId())
+                .stream()
+                .filter(mission -> {
+
+                    if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
                         missionRepository.deleteById(mission.getMissionId());
+                        return false;
                     }
-                });
+
+                    return true;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.size()).isEqualTo(0)

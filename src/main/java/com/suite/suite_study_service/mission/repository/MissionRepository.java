@@ -9,5 +9,5 @@ import java.util.List;
 public interface MissionRepository extends JpaRepository<Mission, Long> {
     List<Mission> findAllBySuiteRoomId(Long suiteRoomId);
 
-    List<Mission> findAllBySuiteRoomIdAndMissionStatus(Long suiteRoomId, MissionType missionType);
+    List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberId(Long suiteRoomId, MissionType missionType, Long memberId);
 }
