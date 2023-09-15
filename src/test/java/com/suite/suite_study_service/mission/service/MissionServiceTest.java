@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -166,6 +167,30 @@ public class MissionServiceTest {
                 ()-> assertThat(assertionMissions.size()).isEqualTo(3),
                 ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.COMPLETE),
                 ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 목록 - 기간 만료")
+    public void timeOutMissions() {
+        //given
+        makeMockMissionList("test", "2023-09-14 18:00:00", MissionType.PROGRESS)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.COMPLETE);
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        assertionMissions.stream()
+                .forEach(mission -> {
+                    if (mission.getMissionDeadLine().getTime() < now.getTime()); {
+                        missionRepository.deleteById(mission.getMissionId());
+                    }
+                });
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMissions.size()).isEqualTo(0)
         );
     }
 

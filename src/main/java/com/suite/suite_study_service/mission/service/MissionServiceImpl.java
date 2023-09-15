@@ -14,7 +14,10 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.suite.suite_study_service.common.security.JwtInfoExtractor.getSuiteAuthorizer;
 
@@ -46,7 +49,23 @@ public class MissionServiceImpl implements MissionService{
     @Override
     public List<Mission> listUpMission(Long suiteRoomId,String missionTypeString) {
         try {
-            return missionRepository.findAllBySuiteRoomIdAndMissionStatus(suiteRoomId, MissionType.valueOf(missionTypeString));
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(suiteRoomId, MissionType.valueOf(missionTypeString))
+                    .stream()
+                    .filter(mission -> {
+                        if (MissionType.valueOf(missionTypeString) == MissionType.PROGRESS) {
+                            if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
+                                missionRepository.deleteById(mission.getMissionId());
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+
+            return missionList;
         } catch (Exception exception) {
             throw new CustomException(StatusCode.NOT_FOUND);
         }
