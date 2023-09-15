@@ -195,10 +195,9 @@ public class MissionServiceTest {
                 .filter(mission -> {
 
                     if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
-                        missionRepository.deleteById(mission.getMissionId());
+                        mission.updateMissionStatus(MissionType.COMPLETE);
                         return false;
                     }
-
                     return true;
                 })
                 .filter(Objects::nonNull)
@@ -208,6 +207,16 @@ public class MissionServiceTest {
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.size()).isEqualTo(0)
         );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 요청 - 스터디원")
+    public void updateMissionStatusProgressToCheckingGuest() {
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 요청 - 방장")
+    public void updateMissionStatusProgressToCheckingHost() {
     }
 
     private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {

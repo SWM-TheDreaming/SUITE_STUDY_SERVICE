@@ -54,12 +54,10 @@ public class MissionServiceImpl implements MissionService{
             List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(suiteRoomId, MissionType.valueOf(missionTypeString), missionReadAttemper.getMemberId())
                     .stream()
                     .filter(mission -> {
-
                         if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
-                            missionRepository.deleteById(mission.getMissionId());
+                            mission.updateMissionStatus(MissionType.COMPLETE);
                             return false;
                         }
-
                         return true;
                     })
                     .filter(Objects::nonNull)

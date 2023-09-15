@@ -48,4 +48,13 @@ public class Mission {
         this.missionStatus = missionStatus;
         this.result = result;
     }
+
+    public void updateMissionStatus(MissionType missionType) {
+        this.missionStatus = missionType;
+    }
+
+    public void updateMissionStatusAndResult() {
+        this.missionStatus = MissionType.COMPLETE;
+        this.result = true;
+    }
 }
