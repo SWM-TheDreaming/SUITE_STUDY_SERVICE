@@ -10,4 +10,6 @@ public interface DashBoardRepository extends JpaRepository<DashBoard, Long> {
     List<DashBoard> findAllBySuiteRoomId(Long suiteRoomId);
     Optional<DashBoard> findByMemberId(Long memberId);
 
+    Optional<DashBoard> findBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId);
+
 }

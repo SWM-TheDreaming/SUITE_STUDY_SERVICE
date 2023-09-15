@@ -6,6 +6,7 @@ import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.MissionType;
+import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -68,6 +69,16 @@ public class MissionServiceImpl implements MissionService{
         } catch (Exception exception) {
             throw new CustomException(StatusCode.NOT_FOUND);
         }
+
+    }
+
+    @Override
+    public void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto) {
+
+    }
+
+    @Override
+    public void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto) {
 
     }
 }
