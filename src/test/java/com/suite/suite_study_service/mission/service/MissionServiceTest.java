@@ -73,6 +73,11 @@ public class MissionServiceTest {
                 throw new CustomException(StatusCode.FORBIDDEN);
             });
         }
+        missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(1L, "test",missionCreationAttempter.getMemberId()).ifPresent(result -> {
+                    assertThrows(CustomException.class, () -> {
+                        throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION);
+                    });
+                });
 
         makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
                 .stream()

@@ -12,5 +12,7 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
 
     List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberId(Long suiteRoomId, MissionType missionType, Long memberId);
 
+    Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberId(Long suiteRoomId, String missionName, Long memberId);
+
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(Long suiteRoomId, String missionName, Long memberId, MissionType missionType);
 }

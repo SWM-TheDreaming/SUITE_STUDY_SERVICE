@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 public class ReqMissionApprovalDto {
     private Long suiteRoomId;
     private String missionName;
+    private Long memberId;
 
     @Builder
-    public ReqMissionApprovalDto(Long suiteRoomId, String missionName) {
+    public ReqMissionApprovalDto(Long suiteRoomId, String missionName, Long memberId) {
         this.suiteRoomId = suiteRoomId;
         this.missionName = missionName;
+        this.memberId = memberId;
     }
 }

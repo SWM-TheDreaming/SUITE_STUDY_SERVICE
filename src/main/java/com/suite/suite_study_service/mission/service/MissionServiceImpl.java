@@ -8,6 +8,7 @@ import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
+import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,9 @@ public class MissionServiceImpl implements MissionService{
                 .orElseThrow(() -> new CustomException(StatusCode.IS_NOT_PARTICIPATED));
         if(!isInDashBoard.isHost()) throw new CustomException(StatusCode.FORBIDDEN);
 
+        missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(1L, reqMissionDto.getMissionName(), missionCreateAttempter.getMemberId())
+                .ifPresent(result -> {throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION);});
+
 
         dashBoardRepository.findAllBySuiteRoomId(reqMissionDto.getSuiteRoomId())
                 .stream()
@@ -48,14 +52,18 @@ public class MissionServiceImpl implements MissionService{
     }
 
     @Override
-    public List<Mission> listUpMission(Long suiteRoomId,String missionTypeString) {
+    @Transactional
+    public List<Mission> listUpMission(ReqMissionListDto reqMissionListDto) {
         try {
             AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(suiteRoomId, MissionType.valueOf(missionTypeString), missionReadAttemper.getMemberId())
+            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
                     .stream()
                     .filter(mission -> {
                         if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
+                            if(mission.getMissionStatus() == MissionType.COMPLETE) {
+                                return true;
+                            }
                             mission.updateMissionStatus(MissionType.COMPLETE);
                             return false;
                         }
@@ -73,23 +81,25 @@ public class MissionServiceImpl implements MissionService{
     }
 
     @Override
+    @Transactional
     public void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
         Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
-                .orElseThrow(() -> new CustomException(StatusCode.IS_NOT_PARTICIPATED));
+                .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
 
         if(isHost) mission.updateMissionStatusAndResult();
-        mission.updateMissionStatus(MissionType.CHECKING);
+        else mission.updateMissionStatus(MissionType.CHECKING);
     }
 
     @Override
+    @Transactional
     public void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
         if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
 
-        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), missionApprovalRequester.getMemberId(), MissionType.CHECKING)
+        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId(), MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
         mission.updateMissionStatusAndResult();
     }

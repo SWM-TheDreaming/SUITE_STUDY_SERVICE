@@ -59,9 +59,10 @@ public class MockMission {
                 .build();
     }
 
-    public static ReqMissionApprovalDto getReqMissionApprovalDto(String missionName) {
+    public static ReqMissionApprovalDto getReqMissionApprovalDto(String missionName, Long memberId) {
         return ReqMissionApprovalDto.builder()
                 .suiteRoomId(1L)
+                .memberId(memberId)
                 .missionName(missionName)
                 .build();
     }

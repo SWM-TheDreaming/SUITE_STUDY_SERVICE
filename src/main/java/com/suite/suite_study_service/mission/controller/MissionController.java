@@ -2,6 +2,7 @@ package com.suite.suite_study_service.mission.controller;
 
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.common.handler.StatusCode;
+import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.service.MissionService;
@@ -27,7 +28,18 @@ public class MissionController {
 
     @PostMapping("/mission")
     public ResponseEntity<Message> listUpMissions(@RequestBody ReqMissionListDto reqMissionListDto) {
-        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.listUpMission(reqMissionListDto.getSuiteRoomId(), reqMissionListDto.getMissionTypeString())));
+        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.listUpMission(reqMissionListDto)));
+    }
+
+    @PostMapping("/mission/submission")
+    public ResponseEntity<Message> requestApprovalMission(@RequestBody ReqMissionApprovalDto reqMissionApprovalDto) {
+        missionService.updateMissionStatusProgressToChecking(reqMissionApprovalDto);
+        return ResponseEntity.ok(new Message(StatusCode.OK));
+    }
+    @PostMapping("/mission/approval")
+    public ResponseEntity<Message> approvalRequestAcceptMission(@RequestBody ReqMissionApprovalDto reqMissionApprovalDto) {
+        missionService.updateMissionStatusCheckingToComplete(reqMissionApprovalDto);
+        return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 
 

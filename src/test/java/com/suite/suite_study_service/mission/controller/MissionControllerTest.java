@@ -2,10 +2,15 @@ package com.suite.suite_study_service.mission.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suite.suite_study_service.common.dto.Message;
+import com.suite.suite_study_service.common.handler.CustomException;
+import com.suite.suite_study_service.common.handler.StatusCode;
+import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
+import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
+import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -24,6 +29,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,12 +68,19 @@ public class MissionControllerTest {
                     .build();
             dashBoardRepository.save(guestDashBoard.toDashBoard());
         }
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
     }
 
     @Test
     @DisplayName("스터디 그룹 미션 생성 - 방장")
     public void registerMission() throws Exception {
         //given
+        missionRepository.deleteAll();
+
         ReqMissionDto reqMissionDto = MockMission.getReqMissionDto();
         String body = mapper.writeValueAsString(reqMissionDto);
         //when
@@ -127,7 +141,7 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 요청 - 방장")
     public void requestApprovalMissionHost() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 1L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         //when
         String responseBody = postRequest("/study/mission/submission", YH_JWT, body);
@@ -142,7 +156,7 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 요청 - 스터디원")
     public void requestApprovalMissionGuest() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 2L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         //when
         String responseBody = postRequest("/study/mission/submission", DR_JWT, body);
@@ -157,8 +171,9 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 승인 - 방장")
     public void approvalRequestAcceptMissionHost() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 1L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        updateMockMissionStatus();
         //when
         String responseBody = postRequest("/study/mission/approval", YH_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
@@ -172,11 +187,12 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 승인 - 스터디원")
     public void approvalRequestAcceptMissionGuest() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 2L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         //when
         String responseBody = postRequest("/study/mission/approval", DR_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
+
         //then
         Assertions.assertAll(
                 () -> assertThat(message.getStatusCode()).isEqualTo(403)
@@ -188,10 +204,43 @@ public class MissionControllerTest {
                         .content(body) //HTTP body에 담는다.
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwt)
-                )
-                .andExpect(status().isOk()).andReturn();
+                ).andReturn();
+                /**
+                 * 아래 대로 함수를 진행하면,
+                 * 200코드가 아닌 다른 코드를 기대해야하는 테스트 코드가
+                 * 기대하는 대로 동작하지 않아서 수정
+                 * 확인했으면 주석 삭제 후 진행
+                 * */
+                //.andExpect(status().isOk()).andReturn();
 
         return result.getResponse().getContentAsString();
+    }
+
+    private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
+        List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
+        List<MockMission> mockMissionList = new ArrayList<>();
+        dashBoards.stream().forEach(dashBoard -> {
+            MockMission mockMission = MockMission.builder()
+                    .suiteRoomId(1L)
+                    .memberId(dashBoard.getMemberId())
+                    .missionName(missionName)
+                    .missionDeadLine(missionDeadLine)
+                    .missionStatus(missionType)
+                    .result(false)
+                    .build();
+            mockMissionList.add(mockMission);
+
+        });
+        return mockMissionList;
+    }
+
+    private void updateMockMissionStatus() {
+        List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
+        dashBoards.stream().forEach(dashBoard -> {
+            Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", dashBoard.getMemberId(), MissionType.PROGRESS)
+                    .orElseThrow(()->new CustomException(StatusCode.NOT_FOUND));
+            mission.updateMissionStatus(MissionType.CHECKING);
+        });
     }
 
 }
