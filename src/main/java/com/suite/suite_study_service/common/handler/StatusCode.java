@@ -8,7 +8,7 @@ public enum StatusCode {
 
     DISABLED_ACCOUNT(403, "삭제된 계정입니다.", HttpStatus.FORBIDDEN),
     DORMANT_ACCOUNT(423, "이 계정은 휴먼 계정입니다.", HttpStatus.LOCKED),
-    ALREADY_EXISTS_SUITEROOM(400, "이미 존재하는 스위트룸입니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_EXISTS_MISSION(400, "이미 생성됐던 미션 이름입니다.", HttpStatus.BAD_REQUEST),
     ALREADY_EXISTS_PARTICIPANT(400, "이미 참여중 입니다.", HttpStatus.BAD_REQUEST),
     CAN_NOT_CALCEL_SUITEROOM(400, "스위트룸 참가 취소를 할 수 없습니다.", HttpStatus.BAD_REQUEST),
     NOT_DELETE_SUITE_ROOM(400, "시작된 스터디는 삭제가 불가능합니다.", HttpStatus.BAD_REQUEST),

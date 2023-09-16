@@ -1,6 +1,7 @@
 package com.suite.suite_study_service.mission.mockEntity;
 
 import com.suite.suite_study_service.mission.dto.MissionType;
+import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.entity.Mission;
@@ -55,6 +56,14 @@ public class MockMission {
         return ReqMissionListDto.builder()
                 .suiteRoomId(1L)
                 .missionTypeString(missionTypeString)
+                .build();
+    }
+
+    public static ReqMissionApprovalDto getReqMissionApprovalDto(String missionName, Long memberId) {
+        return ReqMissionApprovalDto.builder()
+                .suiteRoomId(1L)
+                .memberId(memberId)
+                .missionName(missionName)
                 .build();
     }
 
