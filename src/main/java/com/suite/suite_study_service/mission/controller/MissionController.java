@@ -28,7 +28,7 @@ public class MissionController {
 
     @PostMapping("/mission")
     public ResponseEntity<Message> listUpMissions(@RequestBody ReqMissionListDto reqMissionListDto) {
-        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.listUpMission(reqMissionListDto)));
+        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.getMissions(reqMissionListDto)));
     }
 
     @PostMapping("/mission/submission")

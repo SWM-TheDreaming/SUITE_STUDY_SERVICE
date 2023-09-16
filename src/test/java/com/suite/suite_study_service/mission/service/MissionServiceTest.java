@@ -184,6 +184,32 @@ public class MissionServiceTest {
     }
 
     @Test
+    @DisplayName("스터디 그룹 칸반 보드 관리 - 방장")
+    public void getRequestedMissions() {
+        //given
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
+        //when
+        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionReadAttempter.getMemberId()).get().isHost();
+        if(!isHost) {
+            assertThrows(CustomException.class, () -> {
+                throw new CustomException(StatusCode.FORBIDDEN);
+            });
+        }
+        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.CHECKING),
+                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+        );
+    }
+
+    @Test
     @DisplayName("스터디 그룹 미션 목록 - 기간 만료")
     public void timeOutMissions() {
         //given

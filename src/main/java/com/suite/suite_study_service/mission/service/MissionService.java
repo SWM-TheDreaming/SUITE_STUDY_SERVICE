@@ -10,7 +10,8 @@ import java.util.List;
 public interface MissionService {
     void createMission(ReqMissionDto reqMissionDto);
 
-    List<Mission> listUpMission(ReqMissionListDto reqMissionListDto);
+    List<Mission> getRequestedMissions(ReqMissionListDto reqMissionListDto);
+    List<Mission> getMissions(ReqMissionListDto reqMissionListDto);
 
     void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto);
 

@@ -53,22 +53,35 @@ public class MissionServiceImpl implements MissionService{
 
     @Override
     @Transactional
-    public List<Mission> listUpMission(ReqMissionListDto reqMissionListDto) {
+    public List<Mission> getRequestedMissions(ReqMissionListDto reqMissionListDto) {
+        try {
+            AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
+            Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId()).get().isHost();
+            if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
+
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()))
+                    .stream()
+                    .filter(mission -> isTimeOutMissions(mission, now))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+
+            return missionList;
+        } catch (Exception exception) {
+            throw new CustomException(StatusCode.NOT_FOUND);
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<Mission> getMissions(ReqMissionListDto reqMissionListDto) {
         try {
             AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
             Timestamp now = new Timestamp(System.currentTimeMillis());
             List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
                     .stream()
-                    .filter(mission -> {
-                        if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
-                            if(mission.getMissionStatus() == MissionType.COMPLETE) {
-                                return true;
-                            }
-                            mission.updateMissionStatus(MissionType.COMPLETE);
-                            return false;
-                        }
-                        return true;
-                    })
+                    .filter(mission -> isTimeOutMissions(mission, now))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
@@ -102,5 +115,16 @@ public class MissionServiceImpl implements MissionService{
         Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId(), MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
         mission.updateMissionStatusAndResult();
+    }
+
+    private boolean isTimeOutMissions(Mission mission, Timestamp now) {
+        if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
+            if(mission.getMissionStatus() == MissionType.COMPLETE) {
+                return true;
+            }
+            mission.updateMissionStatus(MissionType.COMPLETE);
+            return false;
+        }
+        return true;
     }
 }
