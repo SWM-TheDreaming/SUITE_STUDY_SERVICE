@@ -123,6 +123,21 @@ public class MissionControllerTest {
     }
 
     @Test
+    @DisplayName("스터디 그룹 칸반 보드 승인 요청 목록 - 방장")
+    public void listUpRequestedMissions() throws Exception {
+        //given
+        ReqMissionListDto reqMissionListDto = MockMission.getReqMissionListDto("CHECKING");
+        String body = mapper.writeValueAsString(reqMissionListDto);
+        //when
+        String responseBody = postRequest("/study/mission/admin", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
     @DisplayName("스터디 그룹 미션 목록 - COMPLETE")
     public void listUpMissionsComplete() throws Exception {
         //given

@@ -31,6 +31,11 @@ public class MissionController {
         return ResponseEntity.ok(new Message(StatusCode.OK,missionService.getMissions(reqMissionListDto)));
     }
 
+    @PostMapping("/mission/admin")
+    public ResponseEntity<Message> listUpRequestedMissions(@RequestBody ReqMissionListDto reqMissionListDto) {
+        return ResponseEntity.ok(new Message(StatusCode.OK,missionService.getRequestedMissions(reqMissionListDto)));
+    }
+
     @PostMapping("/mission/submission")
     public ResponseEntity<Message> requestApprovalMission(@RequestBody ReqMissionApprovalDto reqMissionApprovalDto) {
         missionService.updateMissionStatusProgressToChecking(reqMissionApprovalDto);

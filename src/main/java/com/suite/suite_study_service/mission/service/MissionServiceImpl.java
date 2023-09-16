@@ -60,7 +60,7 @@ public class MissionServiceImpl implements MissionService{
             if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()))
+            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
                     .stream()
                     .filter(mission -> isTimeOutMissions(mission, now))
                     .filter(Objects::nonNull)
