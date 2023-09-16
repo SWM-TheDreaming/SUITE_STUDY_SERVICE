@@ -3,6 +3,7 @@ package com.suite.suite_study_service.mission.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
+import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
@@ -119,6 +120,66 @@ public class MissionControllerTest {
         //then
         Assertions.assertAll(
                 () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 요청 - 방장")
+    public void requestApprovalMissionHost() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        //when
+        String responseBody = postRequest("/study/mission/submission", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 요청 - 스터디원")
+    public void requestApprovalMissionGuest() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        //when
+        String responseBody = postRequest("/study/mission/submission", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 승인 - 방장")
+    public void approvalRequestAcceptMissionHost() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        //when
+        String responseBody = postRequest("/study/mission/approval", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 달성 승인 - 스터디원")
+    public void approvalRequestAcceptMissionGuest() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test");
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        //when
+        String responseBody = postRequest("/study/mission/approval", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(403)
         );
     }
 
