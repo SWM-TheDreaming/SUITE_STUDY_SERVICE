@@ -74,11 +74,23 @@ public class MissionServiceImpl implements MissionService{
 
     @Override
     public void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto) {
+        AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
+        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
+        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
+                .orElseThrow(() -> new CustomException(StatusCode.IS_NOT_PARTICIPATED));
 
+        if(isHost) mission.updateMissionStatusAndResult();
+        mission.updateMissionStatus(MissionType.CHECKING);
     }
 
     @Override
     public void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto) {
+        AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
+        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
+        if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
 
+        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), missionApprovalRequester.getMemberId(), MissionType.CHECKING)
+                .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
+        mission.updateMissionStatusAndResult();
     }
 }
