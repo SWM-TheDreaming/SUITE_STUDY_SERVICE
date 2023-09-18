@@ -3,7 +3,7 @@ package com.suite.suite_study_service.mission.service;
 import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
-import com.suite.suite_study_service.dashboard.entity.DashBoard;
+
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
@@ -12,7 +12,7 @@ import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,9 +35,9 @@ public class MissionServiceImpl implements MissionService{
     public void createMission(ReqMissionDto reqMissionDto) {
         AuthorizerDto missionCreateAttempter = getSuiteAuthorizer();
 
-        DashBoard isInDashBoard = dashBoardRepository.findByMemberId(missionCreateAttempter.getMemberId())
-                .orElseThrow(() -> new CustomException(StatusCode.IS_NOT_PARTICIPATED));
-        if(!isInDashBoard.isHost()) throw new CustomException(StatusCode.FORBIDDEN);
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionDto.getSuiteRoomId(), missionCreateAttempter.getMemberId(), true)
+                .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+
 
         missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(1L, reqMissionDto.getMissionName(), missionCreateAttempter.getMemberId())
                 .ifPresent(result -> {throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION);});
@@ -46,8 +46,7 @@ public class MissionServiceImpl implements MissionService{
         dashBoardRepository.findAllBySuiteRoomId(reqMissionDto.getSuiteRoomId())
                 .stream()
                 .forEach(dashBoard -> {
-                    Mission mission = reqMissionDto.toMission(dashBoard.getMemberId());
-                    missionRepository.save(mission);
+                    missionRepository.save(reqMissionDto.toMission(dashBoard.getMemberId()));
                 });
     }
 
@@ -56,8 +55,8 @@ public class MissionServiceImpl implements MissionService{
     public List<Mission> getRequestedMissions(ReqMissionListDto reqMissionListDto) {
         try {
             AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
-            Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId()).get().isHost();
-            if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId(), true)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
             List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
@@ -109,8 +108,8 @@ public class MissionServiceImpl implements MissionService{
     @Transactional
     public void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
-        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
-        if(!isHost) throw new CustomException(StatusCode.FORBIDDEN);
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId(), true)
+                .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
         Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId(), MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));

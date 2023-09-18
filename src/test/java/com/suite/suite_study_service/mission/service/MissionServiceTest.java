@@ -60,19 +60,9 @@ public class MissionServiceTest {
         //given
         AuthorizerDto missionCreationAttempter = MockAuthorizer.YH();
         //when
-        DashBoard dashBoard = dashBoardRepository.findByMemberId(missionCreationAttempter.getMemberId()).orElseThrow(
-                () -> {
-                    return assertThrows(CustomException.class, () -> {
-                        throw new CustomException(StatusCode.IS_NOT_PARTICIPATED);
-                    });
-                }
-        );
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCreationAttempter.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        if(!dashBoard.isHost()) {
-            assertThrows(CustomException.class, () -> {
-                throw new CustomException(StatusCode.FORBIDDEN);
-            });
-        }
         missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(1L, "test",missionCreationAttempter.getMemberId()).ifPresent(result -> {
                     assertThrows(CustomException.class, () -> {
                         throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION);
@@ -100,20 +90,9 @@ public class MissionServiceTest {
         //given
         AuthorizerDto missionCreationAttempter = MockAuthorizer.DH();
         //when
-        DashBoard dashBoard = dashBoardRepository.findByMemberId(missionCreationAttempter.getMemberId()).orElseThrow(
-                () -> {
-                    //then
-                    return assertThrows(CustomException.class, () -> {
-                        throw new CustomException(StatusCode.IS_NOT_PARTICIPATED);
-                    });
-                }
-        );
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCreationAttempter.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        if(!dashBoard.isHost()) {
-            assertThrows(CustomException.class, () -> {
-                throw new CustomException(StatusCode.FORBIDDEN);
-            });
-        }
     }
 
     @Test
@@ -194,12 +173,9 @@ public class MissionServiceTest {
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionReadAttempter.getMemberId()).get().isHost();
-        if(!isHost) {
-            assertThrows(CustomException.class, () -> {
-                throw new CustomException(StatusCode.FORBIDDEN);
-            });
-        }
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionReadAttempter.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+
         List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING);
         //then
         Assertions.assertAll(
@@ -252,11 +228,8 @@ public class MissionServiceTest {
                 });
         //when
         Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
-                .orElseThrow(() -> {
-                    return assertThrows(CustomException.class, () -> {
-                        throw new CustomException(StatusCode.NOT_FOUND);
-                    });
-                });
+                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+
         assertionMission.updateMissionStatus(MissionType.CHECKING);
 
         //then
@@ -280,11 +253,8 @@ public class MissionServiceTest {
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
 
         Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
-                .orElseThrow(() -> {
-                    return assertThrows(CustomException.class, () -> {
-                        throw new CustomException(StatusCode.NOT_FOUND);
-                    });
-                });
+                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+
         if (isHost) assertionMission.updateMissionStatus(MissionType.COMPLETE);
         //then
         Assertions.assertAll(
@@ -304,19 +274,12 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
-        if(!isHost) {
-            assertThrows(CustomException.class, () -> {
-                throw new CustomException(StatusCode.FORBIDDEN);
-            });
-        }
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
         Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.CHECKING)
-                .orElseThrow(() -> {
-                    return assertThrows(CustomException.class, () -> {
-                        throw new CustomException(StatusCode.NOT_FOUND);
-                    });
-                });
+                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+
         assertionMission.updateMissionStatusAndResult();
         //then
         Assertions.assertAll(
@@ -337,15 +300,50 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
-        if(!isHost) {
-            //then
-            assertThrows(CustomException.class, () -> {
-                throw new CustomException(StatusCode.FORBIDDEN);
-            });
-        }
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
     }
 
+    @Test
+    @DisplayName("스터디 미션 생성 삭제 - 방장")
+    public void deleteMissionHost() {
+        //given
+        AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+
+        missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(1L, "test", MissionType.PROGRESS)
+                .stream()
+                .forEach(mission -> {
+                    missionRepository.delete(mission);
+                });
+
+
+
+        //then
+    }
+
+    @Test
+    @DisplayName("스터디 미션 생성 삭제 - 스터디원")
+    public void deleteMissionGuest() {
+        //given
+        AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+        //then
+    }
     private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
         List<MockMission> mockMissionList = new ArrayList<>();

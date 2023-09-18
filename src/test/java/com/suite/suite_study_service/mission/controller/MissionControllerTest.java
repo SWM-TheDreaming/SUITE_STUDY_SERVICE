@@ -220,13 +220,7 @@ public class MissionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwt)
                 ).andReturn();
-                /**
-                 * 아래 대로 함수를 진행하면,
-                 * 200코드가 아닌 다른 코드를 기대해야하는 테스트 코드가
-                 * 기대하는 대로 동작하지 않아서 수정
-                 * 확인했으면 주석 삭제 후 진행
-                 * */
-                //.andExpect(status().isOk()).andReturn();
+
 
         return result.getResponse().getContentAsString();
     }
