@@ -90,8 +90,10 @@ public class MissionServiceTest {
         //given
         AuthorizerDto missionCreationAttempter = MockAuthorizer.DH();
         //when
-        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCreationAttempter.getMemberId(), true).orElseThrow(
-                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+        assertThrows(CustomException.class, () -> {
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCreationAttempter.getMemberId(), true)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        });
 
     }
 
@@ -300,15 +302,19 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
-                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+
+        assertThrows(CustomException.class, () -> {
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        });
+
     }
 
     @Test
-    @DisplayName("스터디 미션 생성 삭제 - 방장")
+    @DisplayName("스터디 미션 삭제 - 방장")
     public void deleteMissionHost() {
         //given
-        AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
+        AuthorizerDto missionApprovalRequester = MockAuthorizer.YH();
         makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
                 .stream()
                 .forEach(mockMission -> {
@@ -324,13 +330,16 @@ public class MissionServiceTest {
                     missionRepository.delete(mission);
                 });
 
-
-
+        List<Mission> assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(1L, "test", MissionType.PROGRESS);
         //then
+        Assertions.assertAll(
+                ()-> assertThat(assertionMission.size()).isEqualTo(0)
+        );
+
     }
 
     @Test
-    @DisplayName("스터디 미션 생성 삭제 - 스터디원")
+    @DisplayName("스터디 미션 삭제 - 스터디원")
     public void deleteMissionGuest() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
@@ -340,10 +349,15 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
-                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
         //then
+        assertThrows(CustomException.class, () -> {
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        });
+
+
     }
+
     private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
         List<MockMission> mockMissionList = new ArrayList<>();
