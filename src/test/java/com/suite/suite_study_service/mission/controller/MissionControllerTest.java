@@ -6,10 +6,7 @@ import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
-import com.suite.suite_study_service.mission.dto.MissionType;
-import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
+import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
@@ -211,6 +208,53 @@ public class MissionControllerTest {
         //then
         Assertions.assertAll(
                 () -> assertThat(message.getStatusCode()).isEqualTo(403)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 삭제 - 방장")
+    public void removeRequestMissionHost() throws Exception {
+        //given
+        ReqDeleteMissionDto reqDeleteMissionDto = MockMission.getReqDeleteMissionDto(1L, "test");
+        String body = mapper.writeValueAsString(reqDeleteMissionDto);
+        //when
+        String responseBody = postRequest("/study/mission/delete", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+    @Test
+    @DisplayName("스터디 그룹 미션 삭제 - 스터디원")
+    public void removeRequestMissionGuest() throws Exception {
+        //given
+        ReqDeleteMissionDto reqDeleteMissionDto = MockMission.getReqDeleteMissionDto(1L, "test");
+        String body = mapper.writeValueAsString(reqDeleteMissionDto);
+        //when
+        String responseBody = postRequest("/study/mission/delete", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(403)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 승인 취소/반려 - 스터디원/방장")
+    public void cancelMissionCompleteRequest() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 2L);
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        //when
+        String responseBody = postRequest("/study/mission/cancel", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
         );
     }
 
