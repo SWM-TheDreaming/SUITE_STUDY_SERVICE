@@ -50,7 +50,7 @@ class AttendanceServiceTest {
         //given
         AuthorizerDto attendanceCreationAttempter = MockAuthorizer.YH();
         //when
-        DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(attendanceCreationAttempter.getMemberId(), hostMockDashBoard.toDashBoard().getSuiteRoomId(), true).orElseThrow(
+        DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(hostMockDashBoard.toDashBoard().getSuiteRoomId(), attendanceCreationAttempter.getMemberId(), true).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
         MockAttendance mockAttendance = MockAttendance.builder()
@@ -58,8 +58,7 @@ class AttendanceServiceTest {
                 .suiteRoomId(dashBoard.getSuiteRoomId())
                 .status(true)
                 .round(attendanceRepository.filterBySuiteRoomIdAndGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId()).size() + 1)
-                .code(ATTENDANCE_CODE)
-                .attendanceTime("2023-09-18 12:00:00").build();
+                .code(ATTENDANCE_CODE).build();
         Attendance attendance = mockAttendance.toAttendance();
         attendanceRepository.save(attendance);
         //then

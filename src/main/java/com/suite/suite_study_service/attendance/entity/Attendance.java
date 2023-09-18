@@ -3,6 +3,7 @@ package com.suite.suite_study_service.attendance.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class Attendance {
     private int round;
     private boolean status;
     private int code;
+    @CreatedDate
     private Timestamp attendanceTime;
 
     @Builder
