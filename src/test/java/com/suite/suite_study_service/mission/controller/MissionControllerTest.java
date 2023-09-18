@@ -248,6 +248,7 @@ public class MissionControllerTest {
         //given
         ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 2L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        updateMockMissionStatus();
         //when
         String responseBody = postRequest("/study/mission/cancel", DR_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);

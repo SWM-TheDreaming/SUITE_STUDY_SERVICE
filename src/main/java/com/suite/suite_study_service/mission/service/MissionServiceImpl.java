@@ -117,20 +117,25 @@ public class MissionServiceImpl implements MissionService{
     }
 
     @Override
+    @Transactional
     public void deleteMission(Long suiteRoomId, String missionName) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(suiteRoomId, missionApprovalRequester.getMemberId(), true).orElseThrow(
                 () -> new CustomException(StatusCode.FORBIDDEN));
 
-        missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(suiteRoomId, missionName, MissionType.PROGRESS)
-                .stream()
-                .forEach(mission -> {
-                    missionRepository.delete(mission);
-                });
+        List<Mission> missionList = missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(suiteRoomId, missionName, MissionType.PROGRESS);
+        List<Mission> countMissions = missionRepository.findAllBySuiteRoomIdAndMissionName(suiteRoomId, missionName);
+        if (missionList.size() == countMissions.size()) {
+            missionList.stream()
+                    .forEach(mission -> missionRepository.delete(mission));
+        } else {
+            throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION_REQUEST);
+        }
 
     }
 
     @Override
+    @Transactional
     public void updateMissionStatusCheckingToProgress(Long suiteRoomId, String missionName, Long memberId) {
         Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(suiteRoomId, missionName, memberId, MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));

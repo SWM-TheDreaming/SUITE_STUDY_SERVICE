@@ -324,11 +324,15 @@ public class MissionServiceTest {
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(1L, "test", MissionType.PROGRESS)
-                .stream()
-                .forEach(mission -> {
-                    missionRepository.delete(mission);
-                });
+        List<Mission> missionList = missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(1L, "test", MissionType.PROGRESS);
+        List<Mission> countMissions = missionRepository.findAllBySuiteRoomIdAndMissionName(1L, "test");
+        if (missionList.size() == countMissions.size()) {
+            missionList.stream()
+                    .forEach(mission -> missionRepository.delete(mission));
+        } else {
+            assertThrows(CustomException.class, () -> new CustomException(StatusCode.ALREADY_EXISTS_MISSION_REQUEST));
+        }
+
 
         List<Mission> assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(1L, "test", MissionType.PROGRESS);
         //then
