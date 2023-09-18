@@ -354,7 +354,45 @@ public class MissionServiceTest {
             dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true)
                     .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
         });
+    }
 
+    @Test
+    @DisplayName("스터디 승인 요청 취소 - 방장")
+    public void updateMissionStatusCheckingToProgressHost() {
+        //given
+        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
+        //when
+        //then
+        assertThrows(CustomException.class, () -> {
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCancleRequester.getMemberId(), false)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        });
+    }
+
+    @Test
+    @DisplayName("스터디 승인 요청 취소 - 스터디원")
+    public void updateMissionStatusCheckingToProgressGuest() {
+        //given
+        AuthorizerDto missionCancleRequester = MockAuthorizer.DH();
+        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCancleRequester.getMemberId(), false).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+
+        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionCancleRequester.getMemberId(), MissionType.CHECKING)
+                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+
+        cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(cancleRequiredMission.getMissionStatus()).isEqualTo(MissionType.PROGRESS),
+                ()-> assertThat(cancleRequiredMission.getMissionName()).isEqualTo("test"),
+                ()-> assertThat(cancleRequiredMission.getMemberId()).isEqualTo(missionCancleRequester.getMemberId())
+        );
 
     }
 
