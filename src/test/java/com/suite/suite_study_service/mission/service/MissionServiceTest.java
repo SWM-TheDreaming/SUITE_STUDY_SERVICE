@@ -370,20 +370,17 @@ public class MissionServiceTest {
     }
 
     @Test
-    @DisplayName("스터디 승인 요청 취소 - 스터디원")
-    public void updateMissionStatusCheckingToProgressGuest() {
+    @DisplayName("스터디 승인 요청 취소 / 반려 - 스터디원 / 방장")
+    public void updateMissionStatusCheckingToProgress() {
         //given
-        AuthorizerDto missionCancleRequester = MockAuthorizer.DH();
+        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
         makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
                 .stream()
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCancleRequester.getMemberId(), false).orElseThrow(
-                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
-
-        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionCancleRequester.getMemberId(), MissionType.CHECKING)
+        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", 1L, MissionType.CHECKING)
                 .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
 
         cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
@@ -391,10 +388,12 @@ public class MissionServiceTest {
         Assertions.assertAll(
                 ()-> assertThat(cancleRequiredMission.getMissionStatus()).isEqualTo(MissionType.PROGRESS),
                 ()-> assertThat(cancleRequiredMission.getMissionName()).isEqualTo("test"),
-                ()-> assertThat(cancleRequiredMission.getMemberId()).isEqualTo(missionCancleRequester.getMemberId())
+                ()-> assertThat(cancleRequiredMission.getMemberId()).isEqualTo(1L)
         );
 
     }
+
+
 
     private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);

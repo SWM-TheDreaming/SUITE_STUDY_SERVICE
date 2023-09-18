@@ -116,6 +116,27 @@ public class MissionServiceImpl implements MissionService{
         mission.updateMissionStatusAndResult();
     }
 
+    @Override
+    public void deleteMission(Long suiteRoomId, String missionName) {
+        AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(suiteRoomId, missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> new CustomException(StatusCode.FORBIDDEN));
+
+        missionRepository.findBySuiteRoomIdAndMissionNameAndMissionStatus(suiteRoomId, missionName, MissionType.PROGRESS)
+                .stream()
+                .forEach(mission -> {
+                    missionRepository.delete(mission);
+                });
+
+    }
+
+    @Override
+    public void updateMissionStatusCheckingToProgress(Long suiteRoomId, String missionName, Long memberId) {
+        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(suiteRoomId, missionName, memberId, MissionType.CHECKING)
+                .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
+    }
+
     private boolean isTimeOutMissions(Mission mission, Timestamp now) {
         if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
             if(mission.getMissionStatus() == MissionType.COMPLETE) {
