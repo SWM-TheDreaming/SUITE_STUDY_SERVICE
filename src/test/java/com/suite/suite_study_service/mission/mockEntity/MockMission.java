@@ -1,9 +1,6 @@
 package com.suite.suite_study_service.mission.mockEntity;
 
-import com.suite.suite_study_service.mission.dto.MissionType;
-import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
+import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
 import lombok.Builder;
 import org.mockito.Mock;
@@ -63,6 +60,13 @@ public class MockMission {
         return ReqMissionApprovalDto.builder()
                 .suiteRoomId(1L)
                 .memberId(memberId)
+                .missionName(missionName)
+                .build();
+    }
+
+    public static ReqDeleteMissionDto getReqDeleteMissionDto(Long suiteRoomId, String missionName) {
+        return ReqDeleteMissionDto.builder()
+                .suiteRoomId(suiteRoomId)
                 .missionName(missionName)
                 .build();
     }

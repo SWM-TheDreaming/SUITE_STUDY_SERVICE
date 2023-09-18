@@ -13,6 +13,9 @@ public interface MissionService {
     List<Mission> getRequestedMissions(ReqMissionListDto reqMissionListDto);
     List<Mission> getMissions(ReqMissionListDto reqMissionListDto);
 
+    void deleteMission(Long suiteRoomId, String missionName);
+
+    void updateMissionStatusCheckingToProgress(Long suiteRoomId, String missionName, Long memberId);
     void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto);
 
     void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto);

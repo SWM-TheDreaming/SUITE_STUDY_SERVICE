@@ -6,10 +6,7 @@ import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
-import com.suite.suite_study_service.mission.dto.MissionType;
-import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
+import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
@@ -214,19 +211,61 @@ public class MissionControllerTest {
         );
     }
 
+    @Test
+    @DisplayName("스터디 그룹 미션 삭제 - 방장")
+    public void removeRequestMissionHost() throws Exception {
+        //given
+        ReqDeleteMissionDto reqDeleteMissionDto = MockMission.getReqDeleteMissionDto(1L, "test");
+        String body = mapper.writeValueAsString(reqDeleteMissionDto);
+        //when
+        String responseBody = postRequest("/study/mission/delete", YH_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+    @Test
+    @DisplayName("스터디 그룹 미션 삭제 - 스터디원")
+    public void removeRequestMissionGuest() throws Exception {
+        //given
+        ReqDeleteMissionDto reqDeleteMissionDto = MockMission.getReqDeleteMissionDto(1L, "test");
+        String body = mapper.writeValueAsString(reqDeleteMissionDto);
+        //when
+        String responseBody = postRequest("/study/mission/delete", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(403)
+        );
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 미션 승인 취소/반려 - 스터디원/방장")
+    public void cancelMissionCompleteRequest() throws Exception {
+        //given
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto("test", 2L);
+        String body = mapper.writeValueAsString(reqMissionApprovalDto);
+        updateMockMissionStatus();
+        //when
+        String responseBody = postRequest("/study/mission/cancel", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+
+        //then
+        Assertions.assertAll(
+                () -> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
+
     private String postRequest(String url, String jwt, String body) throws Exception {
         MvcResult result = mockMvc.perform(post(url)
                         .content(body) //HTTP body에 담는다.
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwt)
                 ).andReturn();
-                /**
-                 * 아래 대로 함수를 진행하면,
-                 * 200코드가 아닌 다른 코드를 기대해야하는 테스트 코드가
-                 * 기대하는 대로 동작하지 않아서 수정
-                 * 확인했으면 주석 삭제 후 진행
-                 * */
-                //.andExpect(status().isOk()).andReturn();
+
 
         return result.getResponse().getContentAsString();
     }
