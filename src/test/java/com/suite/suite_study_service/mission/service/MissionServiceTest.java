@@ -8,8 +8,8 @@ import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.Mission;
-import com.suite.suite_study_service.mission.mockEntity.MockAuthorizer;
-import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
+import com.suite.suite_study_service.common.mockEntity.MockAuthorizer;
+import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
 
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
