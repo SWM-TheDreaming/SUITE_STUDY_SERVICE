@@ -7,7 +7,6 @@ import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
-import com.suite.suite_study_service.mission.repository.MissionRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,12 +67,11 @@ class AttendanceControllerTest {
         ReqAttendanceCreationDto reqAttendanceCreationDto = MockAttendance.getReqAttendanceCreateionDto();
         String body = mapper.writeValueAsString(reqAttendanceCreationDto);
         //when
-        String responseBody = postRequest("/study/attendance/admin", YH_JWT, body);
+        String responseBody = postRequest("/study/attendance/registration", YH_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
         //then
         Assertions.assertAll(
                 ()-> assertThat(message.getStatusCode()).isEqualTo(200)
-
         );
     }
 
