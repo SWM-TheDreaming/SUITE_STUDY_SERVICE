@@ -1,4 +1,4 @@
-package com.suite.suite_study_service.mission.mockEntity;
+package com.suite.suite_study_service.common.mockEntity;
 
 import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 

@@ -1,34 +1,38 @@
 package com.suite.suite_study_service.attendance.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 
+@Document(collation = "attendance")
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "attendance")
 public class Attendance {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "attendance_id", nullable = false)
     private Long attendanceId;
-
-    @Column(name = "suite_room_id")
     private Long suiteRoomId;
-
-    @Column(name = "member_id")
     private Long memberId;
-
-    @Column(name = "round")
     private int round;
-
-    @Column(name = "status")
     private boolean status;
-
-    @Column(name = "attendance_time")
+    private int code;
+    @CreatedDate
     private Timestamp attendanceTime;
+
+    @Builder
+    public Attendance(Long attendanceId, Long suiteRoomId, Long memberId, int round, boolean status, int code, Timestamp attendanceTime) {
+        this.attendanceId = attendanceId;
+        this.suiteRoomId = suiteRoomId;
+        this.memberId = memberId;
+        this.round = round;
+        this.status = status;
+        this.code = code;
+        this.attendanceTime = attendanceTime;
+    }
 }

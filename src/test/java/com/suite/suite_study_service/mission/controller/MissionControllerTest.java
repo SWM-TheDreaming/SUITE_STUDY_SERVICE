@@ -8,7 +8,7 @@ import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
-import com.suite.suite_study_service.mission.mockEntity.MockDashBoard;
+import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import org.junit.jupiter.api.Assertions;
@@ -25,13 +25,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
