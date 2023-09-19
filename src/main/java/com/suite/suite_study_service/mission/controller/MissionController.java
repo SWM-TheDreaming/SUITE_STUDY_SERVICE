@@ -2,6 +2,7 @@ package com.suite.suite_study_service.mission.controller;
 
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.common.handler.StatusCode;
+import com.suite.suite_study_service.mission.dto.ReqDeleteMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionDto;
 import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
@@ -46,6 +47,19 @@ public class MissionController {
         missionService.updateMissionStatusCheckingToComplete(reqMissionApprovalDto);
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
+
+    @PostMapping("/mission/delete")
+    public ResponseEntity<Message> removeRequestMission(@RequestBody ReqDeleteMissionDto reqDeleteMissionDto) {
+        missionService.deleteMission(reqDeleteMissionDto.getSuiteRoomId(), reqDeleteMissionDto.getMissionName());
+        return ResponseEntity.ok(new Message(StatusCode.OK));
+    }
+
+    @PostMapping("/mission/cancel")
+    public ResponseEntity<Message> cancelMissionCompleteRequest(@RequestBody ReqMissionApprovalDto reqMissionApprovalDto) {
+        missionService.updateMissionStatusCheckingToProgress(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId());
+        return ResponseEntity.ok(new Message(StatusCode.OK));
+    }
+
 
 
 }

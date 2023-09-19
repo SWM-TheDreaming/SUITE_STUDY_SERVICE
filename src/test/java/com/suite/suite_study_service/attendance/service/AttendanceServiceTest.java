@@ -71,7 +71,13 @@ class AttendanceServiceTest {
     @Test
     @DisplayName("스터디 출석 생성 - 스터디원")
     public void createAttendanceGuest() {
-
+        //given
+        AuthorizerDto attendanceCreationAttempter = MockAuthorizer.DH();
+        //when
+        assertThrows(CustomException.class, () -> {
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, attendanceCreationAttempter.getMemberId(), true)
+                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        });
     }
 
 
