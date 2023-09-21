@@ -7,9 +7,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
 
-@Document(collation = "attendance")
+@Document(collection = "attendance")
 @Entity
 @Getter
 @NoArgsConstructor
@@ -23,16 +23,15 @@ public class Attendance {
     private boolean status;
     private int code;
     @CreatedDate
-    private Timestamp attendanceTime;
+    private Date attendanceTime;
 
     @Builder
-    public Attendance(Long attendanceId, Long suiteRoomId, Long memberId, int round, boolean status, int code, Timestamp attendanceTime) {
+    public Attendance(Long attendanceId, Long suiteRoomId, Long memberId, int round, boolean status, int code) {
         this.attendanceId = attendanceId;
         this.suiteRoomId = suiteRoomId;
         this.memberId = memberId;
         this.round = round;
         this.status = status;
         this.code = code;
-        this.attendanceTime = attendanceTime;
     }
 }

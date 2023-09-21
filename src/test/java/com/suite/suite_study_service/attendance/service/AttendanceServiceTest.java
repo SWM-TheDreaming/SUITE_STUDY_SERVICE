@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.attendance.service;
 
+import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
 import com.suite.suite_study_service.attendance.entity.Attendance;
 import com.suite.suite_study_service.attendance.mockEntity.MockAttendance;
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,6 +45,13 @@ class AttendanceServiceTest {
                     .build();
             dashBoardRepository.save(guestDashBoard.toDashBoard());
         }
+        MockAttendance mockAttendance = MockAttendance.builder()
+                .memberId(1L)
+                .suiteRoomId(1L)
+                .status(true)
+                .round(1)
+                .code(ATTENDANCE_CODE).build();
+        attendanceRepository.save(mockAttendance.toAttendance());
     }
 
     @Test
@@ -63,7 +73,7 @@ class AttendanceServiceTest {
         attendanceRepository.save(attendance);
         //then
         Assertions.assertAll(
-                ()-> assertThat(attendance.getRound()).isEqualTo(1),
+                ()-> assertThat(attendance.getRound()).isEqualTo(2),
                 ()-> assertThat(attendance.getCode()).isEqualTo(ATTENDANCE_CODE)
         );
     }
@@ -80,5 +90,43 @@ class AttendanceServiceTest {
         });
     }
 
+    @Test
+    @DisplayName("스터디 출석 진행 - 스터디원")
+    public void registerAttendanceGuest() {
+        //given
+        AuthorizerDto attendanceAttempter = MockAuthorizer.DH();
+        int inputCode = 456;
+        //when
+        DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(hostMockDashBoard.toDashBoard().getSuiteRoomId(), attendanceAttempter.getMemberId(), false).orElseThrow(
+                () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
+        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterBySuiteRoomIdAndGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
+        int round = groupOfAttendanceDtoList.size();
+        int code = groupOfAttendanceDtoList.get(round-1).getLastInsertedCode();
+
+        attendanceRepository.findBySuiteRoomIdAndMemberIdAndRound(dashBoard.getSuiteRoomId(), attendanceAttempter.getMemberId(), round + 1).ifPresent(
+                attendance -> {assertThrows(CustomException.class, () -> new CustomException(StatusCode.ALREADY_ATTENDANCE));});
+
+        if(code != inputCode) assertThrows(CustomException.class, () -> new CustomException(StatusCode.INVALID_ATTENDANCE_CODE));
+        compareAttendanceTime(dashBoard.getSuiteRoomId(), 1L, round);
+        MockAttendance mockAttendance = MockAttendance.builder()
+                .memberId(attendanceAttempter.getMemberId())
+                .suiteRoomId(dashBoard.getSuiteRoomId())
+                .status(true)
+                .round(round)
+                .code(inputCode).build();
+        Attendance attendance = mockAttendance.toAttendance();
+        attendanceRepository.save(attendance);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(attendance.getMemberId()).isEqualTo(attendanceAttempter.getMemberId())
+        );
+    }
+    private void compareAttendanceTime(Long suiteRoomId, Long hostId, int round) {
+        Attendance curAttendance = attendanceRepository.findBySuiteRoomIdAndMemberIdAndRound(suiteRoomId, hostId, round).get();
+
+        Date now = new Date();
+        long differenceInMinutes = now.getTime() - curAttendance.getAttendanceTime().getTime() / (60 * 1000);
+        if (differenceInMinutes < -5) assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN));
+    }
 
 }
