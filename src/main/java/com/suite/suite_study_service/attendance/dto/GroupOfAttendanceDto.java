@@ -9,7 +9,6 @@ import javax.persistence.Id;
 @NoArgsConstructor
 public class GroupOfAttendanceDto {
 
-    private String suiteRoomId;
     private long count;
     private int lastInsertedCode;
 }

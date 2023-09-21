@@ -24,11 +24,16 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
         SortOperation sortByCreatedAt = Aggregation.sort(Sort.by(Sort.Order.asc("attendanceTime")));
         GroupOperation groupBySuiteRoomIdAndRound = group("suiteRoomId", "round")
                 .last("code").as("lastInsertedCode")
+                .last("attendanceTime").as("lastAttendanceTime")
                 .count().as("count");
+
+        SortOperation sortByLastAttendanceAt = Aggregation.sort(Sort.by(Sort.Order.asc("lastAttendanceTime")));
 
         Aggregation aggregation = Aggregation.newAggregation(
                 matchRoundOne,
-                groupBySuiteRoomIdAndRound
+                sortByCreatedAt,
+                groupBySuiteRoomIdAndRound,
+                sortByLastAttendanceAt
         );
 
         return mongoTemplate.aggregate(aggregation, "attendance", GroupOfAttendanceDto.class).getMappedResults();

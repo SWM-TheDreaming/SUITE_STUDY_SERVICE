@@ -1,11 +1,12 @@
 package com.suite.suite_study_service.attendance.mockEntity;
 
 import com.suite.suite_study_service.attendance.dto.ReqAttendanceCreationDto;
+import com.suite.suite_study_service.attendance.dto.ReqAttendanceDto;
 import com.suite.suite_study_service.attendance.entity.Attendance;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.util.Date;
+
 
 @Getter
 @NoArgsConstructor
@@ -41,6 +42,13 @@ public class MockAttendance {
         return ReqAttendanceCreationDto.builder()
                 .suiteRoomId(1L)
                 .attendanceCode(456).build();
+    }
+
+    public static ReqAttendanceDto getReqAttendanceDto() {
+        return ReqAttendanceDto.builder()
+                .suiteRoomId(1L)
+                .hostId(1L)
+                .code(456).build();
     }
 
 }
