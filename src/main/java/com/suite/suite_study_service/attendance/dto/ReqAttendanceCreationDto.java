@@ -24,6 +24,7 @@ public class ReqAttendanceCreationDto {
                 .memberId(memberId)
                 .suiteRoomId(suiteRoomId)
                 .round(round)
+                .status(true)
                 .code(attendanceCode).build();
     }
 }

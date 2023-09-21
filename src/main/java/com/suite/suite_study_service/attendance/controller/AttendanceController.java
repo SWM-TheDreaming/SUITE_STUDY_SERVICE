@@ -1,6 +1,7 @@
 package com.suite.suite_study_service.attendance.controller;
 
 import com.suite.suite_study_service.attendance.dto.ReqAttendanceCreationDto;
+import com.suite.suite_study_service.attendance.dto.ReqAttendanceDto;
 import com.suite.suite_study_service.attendance.service.AttendanceService;
 import com.suite.suite_study_service.common.dto.Message;
 import com.suite.suite_study_service.common.handler.StatusCode;
@@ -20,8 +21,14 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @PostMapping("/registration")
-    public ResponseEntity<Message> registerAttendance(@RequestBody ReqAttendanceCreationDto reqAttendanceCreationDto) {
+    public ResponseEntity<Message> createAttendance(@RequestBody ReqAttendanceCreationDto reqAttendanceCreationDto) {
         attendanceService.createAttendanceHost(reqAttendanceCreationDto, getSuiteAuthorizer().getMemberId());
+        return ResponseEntity.ok(new Message(StatusCode.OK));
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<Message> registerAttendance(@RequestBody ReqAttendanceDto reqAttendanceDto) {
+        attendanceService.registerAttendanceGuest(reqAttendanceDto, getSuiteAuthorizer().getMemberId());
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 

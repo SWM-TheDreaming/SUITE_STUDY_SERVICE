@@ -2,6 +2,7 @@ package com.suite.suite_study_service.attendance.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suite.suite_study_service.attendance.dto.ReqAttendanceCreationDto;
+import com.suite.suite_study_service.attendance.dto.ReqAttendanceDto;
 import com.suite.suite_study_service.attendance.mockEntity.MockAttendance;
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.dto.Message;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
@@ -57,12 +59,18 @@ class AttendanceControllerTest {
                     .build();
             dashBoardRepository.save(guestDashBoard.toDashBoard());
         }
-
+        MockAttendance mockAttendance = MockAttendance.builder()
+                .memberId(1L)
+                .suiteRoomId(1L)
+                .status(true)
+                .round(1)
+                .code(456).build();
+        attendanceRepository.save(mockAttendance.toAttendance());
     }
 
     @Test
     @DisplayName("스터디 그룹 출석 생성 - 방장")
-    public void registerAttendance() throws Exception {
+    public void createAttendance() throws Exception {
         //given
         ReqAttendanceCreationDto reqAttendanceCreationDto = MockAttendance.getReqAttendanceCreateionDto();
         String body = mapper.writeValueAsString(reqAttendanceCreationDto);
@@ -75,6 +83,20 @@ class AttendanceControllerTest {
         );
     }
 
+    @Test
+    @DisplayName("스터디 출석 진행 - 스터디원")
+    public void registerAttendance() throws Exception {
+        //given
+        ReqAttendanceDto reqAttendanceDto = MockAttendance.getReqAttendanceDto();
+        String body = mapper.writeValueAsString(reqAttendanceDto);
+        //when
+        String responseBody = postRequest("/study/attendance/", DR_JWT, body);
+        Message message = mapper.readValue(responseBody, Message.class);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(message.getStatusCode()).isEqualTo(200)
+        );
+    }
 
 
     private String postRequest(String url, String jwt, String body) throws Exception {
