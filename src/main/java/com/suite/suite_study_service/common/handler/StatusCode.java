@@ -27,7 +27,8 @@ public enum StatusCode {
     FAILED_REQUEST(400, "요청에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     INVALID_DATA_FORMAT(400, "형식이 맞지 않습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_ATTENDANCE(400, "이미 출석하였습니다.", HttpStatus.BAD_REQUEST),
-    INVALID_ATTENDANCE_CODE(401, "출석 번호가 올바르지 않습니다", HttpStatus.UNAUTHORIZED)
+    INVALID_ATTENDANCE_CODE(401, "출석 번호가 올바르지 않습니다", HttpStatus.UNAUTHORIZED),
+    TIMEOUT_ATTENDANCE(408, "춣석 시간이 아닙니다.", HttpStatus.REQUEST_TIMEOUT)
     ;
     @Getter
     private int statusCode;

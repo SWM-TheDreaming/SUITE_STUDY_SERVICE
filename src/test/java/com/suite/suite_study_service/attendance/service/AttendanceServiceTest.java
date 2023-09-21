@@ -126,7 +126,7 @@ class AttendanceServiceTest {
 
         Date now = new Date();
         long differenceInMinutes = now.getTime() - curAttendance.getAttendanceTime().getTime() / (60 * 1000);
-        if (differenceInMinutes < -5) assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN));
+        if (differenceInMinutes < -5) assertThrows(CustomException.class, () -> new CustomException(StatusCode.TIMEOUT_ATTENDANCE));
     }
 
 }
