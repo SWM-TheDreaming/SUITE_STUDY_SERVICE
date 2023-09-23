@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 import static com.suite.suite_study_service.common.security.JwtInfoExtractor.getSuiteAuthorizer;
 
 @RestController
@@ -32,4 +34,8 @@ public class AttendanceController {
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 
+    @PostMapping("/board")
+    public ResponseEntity<Message> lookUpListMyAttendanceBoard(@RequestBody Map<String, Long> suite) {
+        return ResponseEntity.ok(new Message(StatusCode.OK, attendanceService.getAttendanceBoard(suite.get("suiteRoomId"), getSuiteAuthorizer().getMemberId())));
+    }
 }
