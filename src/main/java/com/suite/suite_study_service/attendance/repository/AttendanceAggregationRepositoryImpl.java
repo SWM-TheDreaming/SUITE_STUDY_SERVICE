@@ -1,7 +1,7 @@
 package com.suite.suite_study_service.attendance.repository;
 
 import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
-import com.suite.suite_study_service.attendance.dto.ResAttendanceBoardDto;
+import com.suite.suite_study_service.attendance.dto.AttendanceBoardDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,9 +10,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.bson.Document;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 
@@ -22,7 +22,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     private final MongoTemplate mongoTemplate;
 
     @Override
-    public List<GroupOfAttendanceDto> filterByGroupBySuiteRoomId(Long suiteRoomId) {
+    public List<GroupOfAttendanceDto> filterByGroupBySuiteRoomIdAndRound(Long suiteRoomId) {
         MatchOperation matchSuiteRoomId = Aggregation.match(Criteria.where("suiteRoomId").is(suiteRoomId));
         SortOperation sortByCreatedAt = Aggregation.sort(Sort.by(Sort.Order.asc("attendanceTime")));
         GroupOperation groupBySuiteRoomIdAndRound = group("suiteRoomId", "round")
@@ -43,7 +43,20 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     }
 
     @Override
-    public List<ResAttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId) {
+    public int filterByGroupBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
+        GroupOperation groupByMemberId = group("memberId").count().as("count");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                groupByMemberId
+        );
+        Map<String, Integer> data = mongoTemplate.aggregate(aggregation, "attendance", Map.class).getUniqueMappedResult();
+        return data != null ? data.get("count") : 0;
+    }
+
+    @Override
+    public List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId) {
 
         MatchOperation leaderMatch = Aggregation.match(
                 Criteria.where("memberId").is(leaderMemberId)
@@ -81,7 +94,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
                 customLookupOperation,
                 customProjectDocOperation
         );
-        return mongoTemplate.aggregate(aggregation, "attendance", ResAttendanceBoardDto.class).getMappedResults();
+        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceBoardDto.class).getMappedResults();
         /*List<Attendance> leaderAttendances = mongoTemplate.find(Query.query(Criteria.where("memberId").is(leaderMemberId).and("suiteRoomId").is(suiteRoomId)), Attendance.class);
 
         List<ResAttendanceBoardDto> myAttendanceStatusList = new ArrayList<>();

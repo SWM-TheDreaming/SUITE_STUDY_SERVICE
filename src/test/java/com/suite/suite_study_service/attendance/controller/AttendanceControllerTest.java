@@ -72,6 +72,7 @@ class AttendanceControllerTest {
     @DisplayName("스터디 그룹 출석 생성 - 방장")
     public void createAttendance() throws Exception {
         //given
+        attendanceRepository.deleteAll();
         ReqAttendanceCreationDto reqAttendanceCreationDto = MockAttendance.getReqAttendanceCreateionDto();
         String body = mapper.writeValueAsString(reqAttendanceCreationDto);
         //when

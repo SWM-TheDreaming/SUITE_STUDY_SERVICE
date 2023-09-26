@@ -1,9 +1,6 @@
 package com.suite.suite_study_service.attendance.service;
 
-import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
-import com.suite.suite_study_service.attendance.dto.ReqAttendanceCreationDto;
-import com.suite.suite_study_service.attendance.dto.ReqAttendanceDto;
-import com.suite.suite_study_service.attendance.dto.ResAttendanceBoardDto;
+import com.suite.suite_study_service.attendance.dto.*;
 import com.suite.suite_study_service.attendance.entity.Attendance;
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.handler.CustomException;
@@ -31,7 +28,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqAttendanceCreationDto.getSuiteRoomId(), memberId, true).orElseThrow(
                 ()-> new CustomException(StatusCode.FORBIDDEN));
 
-        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomId(dashBoard.getSuiteRoomId());
+        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
         int curRound = groupOfAttendanceDtoList.size();
         compareAttendanceTime(reqAttendanceCreationDto.getSuiteRoomId(), memberId, curRound, true);
         Attendance attendance = reqAttendanceCreationDto.toAttendance(memberId, curRound + 1);
@@ -44,7 +41,7 @@ public class AttendanceServiceImpl implements AttendanceService {
     public void registerAttendanceGuest(ReqAttendanceDto reqAttendanceDto, long memberId) {
         DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqAttendanceDto.getSuiteRoomId(), memberId, false).orElseThrow(
                 () -> new CustomException(StatusCode.FORBIDDEN));
-        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomId(dashBoard.getSuiteRoomId());
+        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
 
         int round = groupOfAttendanceDtoList.size();
         if(round == 0) throw new CustomException(StatusCode.TIMEOUT_ATTENDANCE);
@@ -59,11 +56,15 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public List<ResAttendanceBoardDto> getAttendanceBoard(long suiteRoomId, long memberId) {
+    public ResAttendanceBoardDto getAttendanceBoard(long suiteRoomId, long memberId) {
         DashBoard leader = dashBoardRepository.findBySuiteRoomIdAndIsHost(suiteRoomId, true).orElseThrow(
                 () -> new CustomException(StatusCode.FORBIDDEN));
-
-        return attendanceRepository.filterByGroupByMemberId(suiteRoomId, memberId, leader.getMemberId());
+        int attendanceCount = attendanceRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId);
+        List<AttendanceBoardDto> attendanceBoardDtoList = attendanceRepository.filterByGroupByMemberId(suiteRoomId, memberId, leader.getMemberId());
+        return ResAttendanceBoardDto.builder()
+                .myAttendanceRate(Math.ceil(((double) attendanceCount / attendanceBoardDtoList.size()) * 100) / 100)
+                .depositAmount(leader.getDepositAmount())
+                .attendanceBoardDtoList(attendanceBoardDtoList).build();
     }
 
 
