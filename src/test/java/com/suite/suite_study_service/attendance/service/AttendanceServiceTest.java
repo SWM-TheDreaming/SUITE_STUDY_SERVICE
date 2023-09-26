@@ -67,7 +67,7 @@ class AttendanceServiceTest {
                 .memberId(attendanceCreationAttempter.getMemberId())
                 .suiteRoomId(dashBoard.getSuiteRoomId())
                 .status(true)
-                .round(attendanceRepository.filterBySuiteRoomIdAndGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId()).size() + 1)
+                .round(attendanceRepository.filterByGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId()).size() + 1)
                 .code(ATTENDANCE_CODE).build();
         Attendance attendance = mockAttendance.toAttendance();
         attendanceRepository.save(attendance);
@@ -99,7 +99,7 @@ class AttendanceServiceTest {
         //when
         DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(hostMockDashBoard.toDashBoard().getSuiteRoomId(), attendanceAttempter.getMemberId(), false).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
-        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterBySuiteRoomIdAndGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
+        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
         int round = groupOfAttendanceDtoList.size();
         int code = groupOfAttendanceDtoList.get(round-1).getLastInsertedCode();
 
