@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.attendance.repository;
 
+import com.suite.suite_study_service.dashboard.dto.AttendanceRateDto;
 import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
 import com.suite.suite_study_service.attendance.dto.AttendanceBoardDto;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.bson.Document;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 
@@ -53,6 +55,40 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
         );
         Map<String, Integer> data = mongoTemplate.aggregate(aggregation, "attendance", Map.class).getUniqueMappedResult();
         return data != null ? data.get("count") : 0;
+    }
+
+    public AttendanceRateDto getAttendanceRate(Long suiteRoomId, Long memberId, Long leaderMemberId) {
+        MatchOperation leaderMatch = Aggregation.match(
+                Criteria.where("memberId").is(leaderMemberId)
+                        .and("suiteRoomId").is(suiteRoomId)
+        );
+        Document group = new Document("$group", new Document("_id", null).append("leaderAttendanceCount", new Document("$sum", 1)));
+        MongoOperation groupByIdSum = new MongoOperation(group);
+
+        Document lookup = new Document("$lookup", new Document("from", "attendance")
+                        .append("let", new Document("leaderAttendanceCount", "$leaderAttendanceCount"))
+                        .append("pipeline", Arrays.asList(
+                                new Document("$match", new Document("$expr", new Document("$and", Arrays.asList(new Document("$eq", Arrays.asList("$suiteRoomId", suiteRoomId)), new Document("$eq", Arrays.asList("$memberId", memberId)))))),
+                                new Document("$group", new Document("_id", "$memberId").append("totalAttendance", new Document("$sum", 1))),
+                                new Document("$project", new Document("_id", 0).append("memberId", "$_id").append("attendanceRate", new Document("$cond", new Document("if", new Document("$eq", Arrays.asList("$$leaderAttendanceCount", 0)))
+                                        .append("then", 0).append("else", new Document("$round", Arrays.asList(new Document("$divide", Arrays.asList("$totalAttendance", "$$leaderAttendanceCount")), 2))))))
+                        )).append("as", "attendanceRates"));
+        MongoOperation lookUpAttendanceRate = new MongoOperation(lookup);
+
+        Document unwind = new Document("$unwind", "$attendanceRates");
+        MongoOperation unwindAttendanceRates = new MongoOperation(unwind);
+
+        Document sort = new Document("$sort", new Document("attendanceRates.memberId", 1));
+        MongoOperation sortMemberId = new MongoOperation(sort);
+
+        Document replaceRoot = new Document("$replaceRoot", new Document("newRoot", "$attendanceRates"));
+        MongoOperation replaceRootAttendanceRates = new MongoOperation(replaceRoot);
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                leaderMatch, groupByIdSum, lookUpAttendanceRate, unwindAttendanceRates, sortMemberId, replaceRootAttendanceRates
+
+        );
+        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceRateDto.class).getUniqueMappedResult();
     }
 
     @Override

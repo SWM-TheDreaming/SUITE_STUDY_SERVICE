@@ -1,5 +1,7 @@
 package com.suite.suite_study_service.dashboard.entity;
 
+import com.suite.suite_study_service.dashboard.dto.OtherDashBoardDto;
+import com.suite.suite_study_service.dashboard.dto.ResDashBoardDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,4 +56,12 @@ public class DashBoard {
         this.minAttendanceRate = minAttendanceRate;
         this.minMissionCompleteRate = minMissionCompleteRate;
     }
+
+    public OtherDashBoardDto toOtherDashBoardDto(String nickName, Double attendanceRate, Double missionRate) {
+        return OtherDashBoardDto.builder()
+                .nickName(nickName)
+                .attendanceRate(attendanceRate)
+                .missionRate(missionRate).build();
+    }
+
 }

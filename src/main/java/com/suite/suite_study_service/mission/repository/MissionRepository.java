@@ -3,11 +3,13 @@ package com.suite.suite_study_service.mission.repository;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.Mission;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface MissionRepository extends JpaRepository<Mission, Long> {
+@Repository
+public interface MissionRepository extends JpaRepository<Mission, Long>, MissionDslRepository {
     List<Mission> findAllBySuiteRoomId(Long suiteRoomId);
 
     List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberId(Long suiteRoomId, MissionType missionType, Long memberId);
@@ -19,4 +21,6 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberId(Long suiteRoomId, String missionName, Long memberId);
 
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(Long suiteRoomId, String missionName, Long memberId, MissionType missionType);
+
+
 }

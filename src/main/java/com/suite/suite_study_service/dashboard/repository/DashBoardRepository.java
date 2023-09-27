@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface DashBoardRepository extends JpaRepository<DashBoard, Long> {
     List<DashBoard> findAllBySuiteRoomId(Long suiteRoomId);
     Optional<DashBoard> findByMemberId(Long memberId);
-
+    List<DashBoard> findBySuiteRoomId(Long suiteRoomId);
     Optional<DashBoard> findBySuiteRoomIdAndMemberIdAndIsHost(Long suiteRoomId, Long memberId, Boolean isHost);
 
     Optional<DashBoard> findBySuiteRoomIdAndIsHost(Long suiteRoomId, Boolean isHost);
