@@ -57,8 +57,9 @@ public class DashBoard {
         this.minMissionCompleteRate = minMissionCompleteRate;
     }
 
-    public OtherDashBoardDto toOtherDashBoardDto(String nickName, Double attendanceRate, Double missionRate) {
+    public OtherDashBoardDto toOtherDashBoardDto(Double attendanceRate, Double missionRate) {
         return OtherDashBoardDto.builder()
+                .memberId(memberId)
                 .nickName(nickName)
                 .attendanceRate(attendanceRate)
                 .missionRate(missionRate).build();

@@ -30,7 +30,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 
         List<OtherDashBoardDto> otherDashBoardDto = dashBoardRepository.findBySuiteRoomId(suiteRoomId).stream().map(
                 member -> {
-                    return member.toOtherDashBoardDto(member.getNickName(),
+                    return member.toOtherDashBoardDto(
                             Optional.ofNullable(attendanceRepository.getAttendanceRate(suiteRoomId, member.getMemberId(), leaderDashBoard.getMemberId())).map(AttendanceRateDto::getAttendanceRate).orElse(null),
                             Optional.ofNullable(missionRepository.getMissionRate(suiteRoomId, member.getMemberId())).map(MissionRateDto::getMissionRate).orElse(null));
                 }).collect(Collectors.toList());
