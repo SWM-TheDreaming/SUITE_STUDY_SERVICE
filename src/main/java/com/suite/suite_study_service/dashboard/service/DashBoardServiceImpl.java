@@ -3,10 +3,7 @@ package com.suite.suite_study_service.dashboard.service;
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
-import com.suite.suite_study_service.dashboard.dto.AttendanceRateDto;
-import com.suite.suite_study_service.dashboard.dto.MissionRateDto;
-import com.suite.suite_study_service.dashboard.dto.OtherDashBoardDto;
-import com.suite.suite_study_service.dashboard.dto.ResDashBoardDto;
+import com.suite.suite_study_service.dashboard.dto.*;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -23,6 +20,7 @@ public class DashBoardServiceImpl implements DashBoardService {
     private final DashBoardRepository dashBoardRepository;
     private final AttendanceRepository attendanceRepository;
     private final MissionRepository missionRepository;
+    private final SuiteRoomService suiteRoomService;
 
     @Override
     public ResDashBoardDto getDashboard(long suiteRoomId, long memberId) {
@@ -37,15 +35,13 @@ public class DashBoardServiceImpl implements DashBoardService {
                             Optional.ofNullable(missionRepository.getMissionRate(suiteRoomId, member.getMemberId())).map(MissionRateDto::getMissionRate).orElse(null));
                 }).collect(Collectors.toList());
 
-
+        ResSuiteRoomInfoDto resSuiteRoomInfoDto = suiteRoomService.getSuiteRoomInfo(suiteRoomId);
         return ResDashBoardDto.builder()
                 .depositAmount(leaderDashBoard.getDepositAmount())
                 .myMemberId(memberId)
-                .otherDashBoardDto(otherDashBoardDto).build();
+                .otherDashBoardDto(otherDashBoardDto)
+                .isStart(resSuiteRoomInfoDto.getIsStart())
+                .studyDeadline(resSuiteRoomInfoDto.getStudyDeadline()).build();
 
-    }
-
-    private Double getRate(int memberCount, int count) {
-        return Math.ceil(((double) memberCount / count) * 100) / 100;
     }
 }

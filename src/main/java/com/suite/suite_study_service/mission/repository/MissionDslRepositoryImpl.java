@@ -2,7 +2,6 @@ package com.suite.suite_study_service.mission.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.MathExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.suite.suite_study_service.dashboard.dto.MissionRateDto;
@@ -11,8 +10,6 @@ import com.suite.suite_study_service.mission.entity.QMission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
 
 import static com.suite.suite_study_service.mission.entity.QMission.mission;
 
@@ -28,7 +25,7 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
 
         int cnt = jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId)).groupBy(m.suiteRoomId, m.memberId).fetchOne().intValue();
         if(cnt == 0) return null;
-        MissionRateDto results = jpaQueryFactory
+        return jpaQueryFactory
                 .select(Projections.constructor(MissionRateDto.class,
                         m.memberId,
                         MathExpressions.round(
@@ -41,8 +38,6 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
                 .groupBy(m.suiteRoomId, m.memberId)
                 .orderBy(m.memberId.asc())
                 .fetchOne();
-
-        return results;
     }
 
 }
