@@ -8,8 +8,15 @@ import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,4 +51,56 @@ public class DashBoardServiceImpl implements DashBoardService {
                 .studyDeadline(resSuiteRoomInfoDto.getStudyDeadline()).build();
 
     }
+
+    @Override
+    public void getCount(long suiteRoomId, long memberId) {
+        DashBoard leaderDashBoard = dashBoardRepository.findBySuiteRoomIdAndIsHost(suiteRoomId, true).orElseThrow(
+                () -> new CustomException(StatusCode.FORBIDDEN));
+        ResSuiteRoomInfoDto resSuiteRoomInfoDto = suiteRoomService.getSuiteRoomInfo(suiteRoomId);
+
+        int leaderAttendanceCount = attendanceRepository.getAttendanceCountForMember(suiteRoomId, leaderDashBoard.getMemberId());
+
+        List<Boolean> attendanceList = dashBoardRepository.findBySuiteRoomId(suiteRoomId).stream().map(
+                member -> {
+                    return member.checkAttendance(attendanceRepository.getAttendanceCountForMember(suiteRoomId, member.getMemberId()), leaderAttendanceCount);
+                }).collect(Collectors.toList());
+
+        boolean isAllAttendance = attendanceList.stream().allMatch(Boolean::booleanValue);
+
+        if(isAllAttendance) {
+            List<Date> attendanceDateList = attendanceRepository.getAttendanceDatesBySuiteRoomIdAndMemberId(suiteRoomId, leaderDashBoard.getMemberId());
+            Double attendanceFrequency = getAttendanceDateSum(attendanceDateList, getBetweenDate(resSuiteRoomInfoDto.getStudyStartDate(), resSuiteRoomInfoDto.getStudyDeadline()));
+
+        }
+
+
+    }
+
+    private Double getAttendanceDateSum(List<Date> attendanceDateList, Long studyDay) {
+        int totalDaysDifference = 0;
+        Date prevDate = null;
+
+        for (Date currentDate : attendanceDateList) {
+            if (prevDate != null) {
+                Instant start = prevDate.toInstant();
+                Instant end = currentDate.toInstant();
+
+                long daysBetween = Duration.between(start, end).toDays();
+                totalDaysDifference += daysBetween;
+            }
+            prevDate = currentDate;
+        }
+        Double avgAttendance = (double) totalDaysDifference / (attendanceDateList.size() - 1);
+
+        return attendanceDateList.size() > 1 ? Math.ceil((avgAttendance / studyDay) * 1000) / 1000 : 0;
+    }
+
+
+    private Long getBetweenDate(Timestamp studyStartDate, Timestamp studyDeadline) {
+        LocalDate start = studyStartDate.toLocalDateTime().toLocalDate();
+        LocalDate end = studyDeadline.toLocalDateTime().toLocalDate();
+
+        return ChronoUnit.DAYS.between(start, end);
+    }
+
 }

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface DashBoardService {
     ResDashBoardDto getDashboard(long suiteRoomId, long memberId);
+
+    void getCount(long suiteRoomId, long memberId);
 }

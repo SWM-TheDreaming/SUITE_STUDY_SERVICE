@@ -11,12 +11,11 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.bson.Document;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 
 @RequiredArgsConstructor
 public class AttendanceAggregationRepositoryImpl implements AttendanceAggregationRepository{
@@ -25,7 +24,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
 
     @Override
     public List<GroupOfAttendanceDto> filterByGroupBySuiteRoomIdAndRound(Long suiteRoomId) {
-        MatchOperation matchSuiteRoomId = Aggregation.match(Criteria.where("suiteRoomId").is(suiteRoomId));
+        MatchOperation matchSuiteRoomId = match(Criteria.where("suiteRoomId").is(suiteRoomId));
         SortOperation sortByCreatedAt = Aggregation.sort(Sort.by(Sort.Order.asc("attendanceTime")));
         GroupOperation groupBySuiteRoomIdAndRound = group("suiteRoomId", "round")
                 .last("code").as("lastInsertedCode")
@@ -46,7 +45,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
 
     @Override
     public int filterByGroupBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
+        MatchOperation matchOperation = match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
         GroupOperation groupByMemberId = group("memberId").count().as("count");
 
         Aggregation aggregation = Aggregation.newAggregation(
@@ -57,8 +56,42 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
         return data != null ? data.get("count") : 0;
     }
 
+    @Override
+    public int getAttendanceCountForMember(Long suiteRoomId, Long memberId) {
+        MatchOperation matchOperation = match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
+        GroupOperation groupByMemberId = group("memberId").count().as("count");
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                groupByMemberId
+        );
+
+        // 집계 연산 수행
+        AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, "attendance", Map.class);
+
+        // 결과 반환
+        return results.getUniqueMappedResult() != null ? Integer.parseInt(results.getUniqueMappedResult().get("count").toString()) : 0;
+    }
+
+    @Override
+    public List<Date> getAttendanceDatesBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
+        ProjectionOperation projectionOperation = Aggregation.project("attendanceTime");
+        SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Order.asc("attendanceTime")));
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                projectionOperation,
+                sortOperation)
+        ;
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "attendance", Document.class);
+
+        return results.getMappedResults().stream()
+                .map(doc -> doc.getDate("attendanceTime"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public AttendanceRateDto getAttendanceRate(Long suiteRoomId, Long memberId, Long leaderMemberId) {
-        MatchOperation leaderMatch = Aggregation.match(
+        MatchOperation leaderMatch = match(
                 Criteria.where("memberId").is(leaderMemberId)
                         .and("suiteRoomId").is(suiteRoomId)
         );
@@ -94,7 +127,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     @Override
     public List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId) {
 
-        MatchOperation leaderMatch = Aggregation.match(
+        MatchOperation leaderMatch = match(
                 Criteria.where("memberId").is(leaderMemberId)
                         .and("suiteRoomId").is(suiteRoomId)
         );
