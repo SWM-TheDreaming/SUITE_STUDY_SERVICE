@@ -2,6 +2,7 @@ package com.suite.suite_study_service.mission.repository;
 
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.Mission;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +20,7 @@ public interface MissionRepository extends JpaRepository<Mission, Long>, Mission
 
     List<Mission> findAllBySuiteRoomIdAndMissionName(Long suiteRoomId, String missionName);
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberId(Long suiteRoomId, String missionName, Long memberId);
-
+    Boolean existsBySuiteRoomIdAndResult(Long suiteRoomId, Boolean result);
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(Long suiteRoomId, String missionName, Long memberId, MissionType missionType);
 
 

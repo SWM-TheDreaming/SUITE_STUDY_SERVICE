@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface MissionDslRepository {
     MissionRateDto getMissionRate(Long suiteRoomId, Long memberId);
+    int getMissionCount(Long suiteRoomId, Long memberId);
 }

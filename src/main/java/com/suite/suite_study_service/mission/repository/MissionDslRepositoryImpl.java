@@ -20,6 +20,7 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
+    @Override
     public MissionRateDto getMissionRate(Long suiteRoomId, Long memberId) {
         QMission m = mission;
 
@@ -38,6 +39,12 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
                 .groupBy(m.suiteRoomId, m.memberId)
                 .orderBy(m.memberId.asc())
                 .fetchOne();
+    }
+
+    @Override
+    public int getMissionCount(Long suiteRoomId, Long memberId) {
+        QMission m = mission;
+        return jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId), m.memberId.eq(memberId)).groupBy(m.suiteRoomId).fetchOne().intValue();
     }
 
 }

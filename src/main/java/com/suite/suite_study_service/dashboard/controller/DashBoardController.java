@@ -25,9 +25,9 @@ public class DashBoardController {
         return ResponseEntity.ok(new Message(StatusCode.OK, dashBoardService.getDashboard(suite.get("suiteRoomId"), getSuiteAuthorizer().getMemberId())));
     }
 
-    @PostMapping("/hole")
+    @PostMapping("/terminate")
     public ResponseEntity<Message> getCount(@RequestBody Map<String, Long> suite) {
-        dashBoardService.getCount(suite.get("suiteRoomId"), getSuiteAuthorizer().getMemberId());
+        dashBoardService.terminateStudy(suite.get("suiteRoomId"));
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 }
