@@ -22,7 +22,12 @@ public class DashBoardController {
 
     @PostMapping("/dashboard")
     public ResponseEntity<Message> lookUpListDashboard(@RequestBody Map<String, Long> suite) {
-        
         return ResponseEntity.ok(new Message(StatusCode.OK, dashBoardService.getDashboard(suite.get("suiteRoomId"), getSuiteAuthorizer().getMemberId())));
+    }
+
+    @PostMapping("/terminate")
+    public ResponseEntity<Message> getCount(@RequestBody Map<String, Long> suite) {
+        dashBoardService.terminateStudy(suite.get("suiteRoomId"));
+        return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 }

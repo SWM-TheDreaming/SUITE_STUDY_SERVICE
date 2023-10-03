@@ -65,4 +65,8 @@ public class DashBoard {
                 .missionRate(missionRate).build();
     }
 
+    public boolean checkAttendance(int memberAttendanceCount, int leaderAttendanceCount) {
+        return memberAttendanceCount == leaderAttendanceCount;
+    }
+
 }

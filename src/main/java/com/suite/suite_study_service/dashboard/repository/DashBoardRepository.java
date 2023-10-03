@@ -17,4 +17,5 @@ public interface DashBoardRepository extends JpaRepository<DashBoard, Long> {
     Optional<DashBoard> findBySuiteRoomIdAndIsHost(Long suiteRoomId, Boolean isHost);
 
     Optional<DashBoard> findBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId);
+    int countBySuiteRoomId(Long suiteRoomId);
 }
