@@ -5,10 +5,7 @@ import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
-import com.suite.suite_study_service.mission.dto.MissionType;
-import com.suite.suite_study_service.mission.dto.ReqMissionApprovalDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionDto;
-import com.suite.suite_study_service.mission.dto.ReqMissionListDto;
+import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,19 +47,21 @@ public class MissionServiceImpl implements MissionService{
                 });
     }
 
+
     @Override
     @Transactional
-    public List<Mission> getRequestedMissions(ReqMissionListDto reqMissionListDto) {
+    public List<ResMissionListDto> getRequestedMissions(ReqMissionListDto reqMissionListDto) {
         try {
             AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
             dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId(), true)
                     .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
+            List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
                     .stream()
                     .filter(mission -> isTimeOutMissions(mission, now))
                     .filter(Objects::nonNull)
+                    .map(mission -> mission.toResMissionListDto())
                     .collect(Collectors.toList());
 
 
@@ -74,14 +73,15 @@ public class MissionServiceImpl implements MissionService{
 
     @Override
     @Transactional
-    public List<Mission> getMissions(ReqMissionListDto reqMissionListDto) {
+    public List<ResMissionListDto> getMissions(ReqMissionListDto reqMissionListDto) {
         try {
             AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
             Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<Mission> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
+            List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
                     .stream()
                     .filter(mission -> isTimeOutMissions(mission, now))
                     .filter(Objects::nonNull)
+                    .map(mission -> mission.toResMissionListDto())
                     .collect(Collectors.toList());
 
 

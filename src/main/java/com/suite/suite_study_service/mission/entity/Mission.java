@@ -1,6 +1,7 @@
 package com.suite.suite_study_service.mission.entity;
 
 import com.suite.suite_study_service.mission.dto.MissionType;
+import com.suite.suite_study_service.mission.dto.ResMissionListDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,5 +57,13 @@ public class Mission {
     public void updateMissionStatusAndResult() {
         this.missionStatus = MissionType.COMPLETE;
         this.result = true;
+    }
+
+    public ResMissionListDto toResMissionListDto() {
+        return ResMissionListDto.builder()
+                .missionId(this.missionId)
+                .missionName(this.missionName)
+                .missionDeadLine(this.missionDeadLine)
+                .build();
     }
 }
