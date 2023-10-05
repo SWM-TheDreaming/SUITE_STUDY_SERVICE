@@ -30,4 +30,6 @@ public class DashBoardController {
         dashBoardService.terminateStudy(suite.get("suiteRoomId"));
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
+
+
 }

@@ -4,12 +4,15 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.MathExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.suite.suite_study_service.dashboard.dto.MissionAvgDto;
 import com.suite.suite_study_service.dashboard.dto.MissionRateDto;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.entity.QMission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.util.Optional;
 
 import static com.suite.suite_study_service.mission.entity.QMission.mission;
 
@@ -24,8 +27,9 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
     public MissionRateDto getMissionRate(Long suiteRoomId, Long memberId) {
         QMission m = mission;
 
-        int cnt = jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId)).groupBy(m.suiteRoomId, m.memberId).fetchOne().intValue();
-        if(cnt == 0) return null;
+        Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId).and(m.memberId.eq(memberId))).groupBy(m.suiteRoomId, m.memberId).fetchOne();
+        int cnt = Optional.ofNullable(countResult).orElse(0L).intValue();
+        if(cnt == 0 ) return null;
         return jpaQueryFactory
                 .select(Projections.constructor(MissionRateDto.class,
                         m.memberId,
@@ -39,6 +43,33 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
                 .groupBy(m.suiteRoomId, m.memberId)
                 .orderBy(m.memberId.asc())
                 .fetchOne();
+    }
+
+    @Override
+    public MissionAvgDto getMissionAvg(Long memberId) {
+        QMission m = mission;
+
+        Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.memberId.eq(memberId)).groupBy(m.suiteRoomId, m.memberId).fetchOne();
+        int cnt = Optional.ofNullable(countResult).orElse(0L).intValue();
+
+        if(cnt == 0) return null;
+        return jpaQueryFactory
+                .select(Projections.constructor(MissionAvgDto.class,
+                        m.memberId,
+                        MathExpressions.round(
+                                new CaseBuilder()
+                                        .when(m.missionStatus.eq(MissionType.COMPLETE)).then(1)
+                                        .otherwise(0)
+                                        .sum()
+                        ),
+                        MathExpressions.round(
+                                new CaseBuilder()
+                                        .when(m.missionStatus.eq(MissionType.COMPLETE)).then(1)
+                                        .otherwise(0)
+                                        .sum().divide(cnt).doubleValue(), 2)))
+                .from(m)
+                .where(m.memberId.eq(memberId))
+                .groupBy(m.memberId).fetchOne();
     }
 
     @Override
