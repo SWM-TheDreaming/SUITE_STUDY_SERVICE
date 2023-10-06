@@ -52,21 +52,20 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
         Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.memberId.eq(memberId)).groupBy(m.suiteRoomId, m.memberId).fetchOne();
         int cnt = Optional.ofNullable(countResult).orElse(0L).intValue();
 
-        if(cnt == 0) return null;
+        if(cnt == 0) return MissionAvgDto.builder().missionAvgRate(0.0).missionCompleteCount(0).build();
         return jpaQueryFactory
                 .select(Projections.constructor(MissionAvgDto.class,
-                        m.memberId,
                         MathExpressions.round(
                                 new CaseBuilder()
                                         .when(m.missionStatus.eq(MissionType.COMPLETE)).then(1)
                                         .otherwise(0)
-                                        .sum()
+                                        .sum().coalesce(0)
                         ),
                         MathExpressions.round(
                                 new CaseBuilder()
                                         .when(m.missionStatus.eq(MissionType.COMPLETE)).then(1)
                                         .otherwise(0)
-                                        .sum().divide(cnt).doubleValue(), 2)))
+                                        .sum().divide(cnt).doubleValue(), 2).coalesce(0.0)))
                 .from(m)
                 .where(m.memberId.eq(memberId))
                 .groupBy(m.memberId).fetchOne();

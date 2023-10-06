@@ -38,11 +38,10 @@ public class DashBoardServiceImpl implements DashBoardService {
 
 
         List<OtherDashBoardDto> otherDashBoardDto = dashBoardRepository.findBySuiteRoomId(suiteRoomId).stream().map(
-                member -> {
-                    return member.toOtherDashBoardDto(
-                            Optional.ofNullable(attendanceRepository.getAttendanceRate(suiteRoomId, member.getMemberId(), leaderDashBoard.getMemberId())).map(AttendanceRateDto::getAttendanceRate).orElse(null),
-                            Optional.ofNullable(missionRepository.getMissionRate(suiteRoomId, member.getMemberId())).map(MissionRateDto::getMissionRate).orElse(null));
-                }).collect(Collectors.toList());
+                member -> member.toOtherDashBoardDto(
+                        Optional.ofNullable(attendanceRepository.getAttendanceRate(suiteRoomId, member.getMemberId(), leaderDashBoard.getMemberId())).map(AttendanceRateDto::getAttendanceRate).orElse(null),
+                        Optional.ofNullable(missionRepository.getMissionRate(suiteRoomId, member.getMemberId())).map(MissionRateDto::getMissionRate).orElse(null))
+        ).collect(Collectors.toList());
 
         ResSuiteRoomInfoDto resSuiteRoomInfoDto = suiteRoomService.getSuiteRoomInfo(suiteRoomId);
         return ResDashBoardDto.builder()
@@ -63,9 +62,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         int leaderAttendanceCount = attendanceRepository.getAttendanceCountForMember(suiteRoomId, leaderDashBoard.getMemberId());
 
         List<Boolean> attendanceList = dashBoardRepository.findBySuiteRoomId(suiteRoomId).stream().map(
-                member -> {
-                    return member.checkAttendance(attendanceRepository.getAttendanceCountForMember(suiteRoomId, member.getMemberId()), leaderAttendanceCount);
-                }).collect(Collectors.toList());
+                member -> member.checkAttendance(attendanceRepository.getAttendanceCountForMember(suiteRoomId, member.getMemberId()), leaderAttendanceCount)).collect(Collectors.toList());
 
         boolean isAllAttendance = attendanceList.stream().allMatch(Boolean::booleanValue);
         boolean isAllMission = !missionRepository.existsBySuiteRoomIdAndResult(suiteRoomId, false);

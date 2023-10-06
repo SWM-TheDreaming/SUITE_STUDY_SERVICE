@@ -44,6 +44,18 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     }
 
     @Override
+    public int getAllAttendanceCount(Long memberId) {
+        MatchOperation matchOperation = match(Criteria.where("memberId").is(memberId));
+        GroupOperation groupOperation = group("memberId").count().as("count");
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                groupOperation
+        );
+        Map<String, Integer> data = mongoTemplate.aggregate(aggregation, "attendance", Map.class).getUniqueMappedResult();
+        return data != null ? data.get("count") : 0;
+    }
+
+    @Override
     public int filterByGroupBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId) {
         MatchOperation matchOperation = match(Criteria.where("suiteRoomId").is(suiteRoomId).and("memberId").is(memberId));
         GroupOperation groupByMemberId = group("memberId").count().as("count");

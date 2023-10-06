@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DashBoardRepository extends JpaRepository<DashBoard, Long> {
+public interface DashBoardRepository extends JpaRepository<DashBoard, Long>, DashBoardDslRepository {
     List<DashBoard> findAllBySuiteRoomId(Long suiteRoomId);
     Optional<DashBoard> findByMemberId(Long memberId);
     List<DashBoard> findBySuiteRoomId(Long suiteRoomId);

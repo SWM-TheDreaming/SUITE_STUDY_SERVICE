@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.dashboard.dto;
 
+import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DashBoardAvgDto {
     private Long suiteRoomId;
-    private Long memberId;
 
     @Builder
-    public DashBoardAvgDto(Long suiteRoomId, Long memberId) {
+    public DashBoardAvgDto(Long suiteRoomId) {
         this.suiteRoomId = suiteRoomId;
-        this.memberId = memberId;
+    }
+
+
+    public Double toAttendanceRateList(Double attendanceRate) {
+        return (attendanceRate != null) ? attendanceRate : 0;
     }
 }

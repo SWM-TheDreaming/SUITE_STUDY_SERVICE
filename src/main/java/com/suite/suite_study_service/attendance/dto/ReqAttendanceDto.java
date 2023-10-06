@@ -10,13 +10,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReqAttendanceDto {
     private Long suiteRoomId;
-    private Long hostId;
     private int code;
 
     @Builder
-    public ReqAttendanceDto(Long suiteRoomId, Long hostId, int code) {
+    public ReqAttendanceDto(Long suiteRoomId, int code) {
         this.suiteRoomId = suiteRoomId;
-        this.hostId = hostId;
         this.code = code;
     }
 
