@@ -1,5 +1,6 @@
 package com.suite.suite_study_service.dashboard.service;
 
+import com.suite.suite_study_service.attendance.repository.AttendanceAggregationRepository;
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
@@ -7,6 +8,7 @@ import com.suite.suite_study_service.dashboard.dto.*;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.kafka.producer.SuiteStudyProducer;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
+import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.protocol.types.Field;
@@ -17,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -74,9 +77,12 @@ public class DashBoardServiceImpl implements DashBoardService {
             suiteStudyProducer.selectHallOfFame(suiteRoomId, getHonorPoints(leaderAttendanceCount, leaderMissionCount, memberCount, attendanceFrequency));
         }
         //정산 진행
-
-
+        String suiteRoomTitle = resSuiteRoomInfoDto.getTitle();
+        List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(suiteRoomId);
+        suiteStudyProducer.stopStudyContract(suiteRoomId, suiteRoomTitle, dashBoards, leaderAttendanceCount);
     }
+
+
 
     private Double getHonorPoints(int attendanceCount, int missionCount, int memberCount, Double attendanceFrequency) {
         return attendanceFrequency != 0 ? Math.ceil(((attendanceCount + missionCount + memberCount) / attendanceFrequency) * 100) / 100 : 0;

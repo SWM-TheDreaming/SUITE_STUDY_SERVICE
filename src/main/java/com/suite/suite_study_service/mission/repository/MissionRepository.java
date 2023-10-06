@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface MissionRepository extends JpaRepository<Mission, Long>, MissionDslRepository {
     List<Mission> findAllBySuiteRoomId(Long suiteRoomId);
 
+    List<Mission> findAllBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId);
     List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberId(Long suiteRoomId, MissionType missionType, Long memberId);
 
     List<Mission> findBySuiteRoomIdAndMissionNameAndMissionStatus(Long suiteRoomId, String missionName, MissionType missionType);
@@ -23,5 +24,6 @@ public interface MissionRepository extends JpaRepository<Mission, Long>, Mission
     Boolean existsBySuiteRoomIdAndResult(Long suiteRoomId, Boolean result);
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(Long suiteRoomId, String missionName, Long memberId, MissionType missionType);
 
+    List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(Long suiteRoomId, MissionType missionType, Long memberId, Boolean result);
 
 }

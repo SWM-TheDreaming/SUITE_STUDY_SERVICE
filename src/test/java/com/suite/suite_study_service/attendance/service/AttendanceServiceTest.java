@@ -121,6 +121,7 @@ class AttendanceServiceTest {
                 ()-> assertThat(attendance.getMemberId()).isEqualTo(attendanceAttempter.getMemberId())
         );
     }
+
     private void compareAttendanceTime(Long suiteRoomId, Long hostId, int round) {
         Attendance curAttendance = attendanceRepository.findBySuiteRoomIdAndMemberIdAndRound(suiteRoomId, hostId, round).get();
 

@@ -62,6 +62,7 @@ public class SuiteStudyConsumer {
                     .minMissionCompleteRate(minMissionCompleteRate)
                     .depositAmount(depositAmount)
                     .memberId(Long.parseLong(participant.get("memberId").toString()))
+                    .name(participant.get("name").toString())
                     .email(participant.get("email").toString())
                     .nickName(participant.get("nickName").toString())
                     .isHost(Boolean.parseBoolean(participant.get("host").toString())).build());
