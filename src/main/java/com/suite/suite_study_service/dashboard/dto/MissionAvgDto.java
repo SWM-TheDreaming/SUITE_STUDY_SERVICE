@@ -9,14 +9,12 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class MissionAvgDto {
-    private Long memberId;
-    private String missionCompleteCount;
-    private Double missionRate;
+    private int missionCompleteCount;
+    private Double missionAvgRate;
 
     @Builder
-    public MissionAvgDto(Long memberId, String missionCompleteCount, Double missionRate) {
-        this.memberId = memberId;
+    public MissionAvgDto(int missionCompleteCount, Double missionAvgRate) {
         this.missionCompleteCount = missionCompleteCount;
-        this.missionRate = missionRate;
+        this.missionAvgRate = missionAvgRate;
     }
 }

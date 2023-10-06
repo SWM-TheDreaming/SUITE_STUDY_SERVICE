@@ -13,6 +13,7 @@ public interface AttendanceAggregationRepository {
     List<GroupOfAttendanceDto> filterByGroupBySuiteRoomIdAndRound(Long suiteRoomId);
     List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId);
     int filterByGroupBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId);
+    int getAllAttendanceCount(Long memberId);
     AttendanceRateDto getAttendanceRate(Long suiteRoomId, Long memberId, Long leaderMemberId);
     int getAttendanceCountForMember(Long suiteRoomId, Long memberId);
     List<Date> getAttendanceDatesBySuiteRoomIdAndMemberId(Long suiteRoomId, Long memberId);

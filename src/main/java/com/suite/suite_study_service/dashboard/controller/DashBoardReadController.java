@@ -1,7 +1,6 @@
 package com.suite.suite_study_service.dashboard.controller;
 
-import com.suite.suite_study_service.common.dto.Message;
-import com.suite.suite_study_service.common.handler.StatusCode;
+import com.suite.suite_study_service.dashboard.dto.ResDashBoardAvgDto;
 import com.suite.suite_study_service.dashboard.service.DashBoardReadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashBoardReadController {
     private final DashBoardReadService dashBoardReadService;
 
-    @RequestMapping("/test/{memberId}")
-    public ResponseEntity<Message> getData(@PathVariable Long memberId) {
-        dashBoardReadService.getMemberStudyAvgInfo(memberId);
-        return ResponseEntity.ok(new Message(StatusCode.OK));
+    @RequestMapping("/study-info/{memberId}")
+    public ResponseEntity<ResDashBoardAvgDto> getStudyInfo(@PathVariable Long memberId) {
+        return ResponseEntity.ok(dashBoardReadService.getMemberStudyAvgInfo(memberId));
     }
 }
