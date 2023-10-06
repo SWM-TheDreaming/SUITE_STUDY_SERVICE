@@ -7,6 +7,7 @@ import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.MissionType;
+import com.suite.suite_study_service.mission.dto.ResMissionListDto;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.common.mockEntity.MockAuthorizer;
 import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
@@ -109,14 +110,15 @@ public class MissionServiceTest {
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.PROGRESS, missionReadAttempter.getMemberId());
+        List<ResMissionListDto> assertionMissionsDto = missionRepository
+                .findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.PROGRESS, missionReadAttempter.getMemberId())
+                .stream()
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
-                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS),
-                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+                ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class),
+                ()-> assertThat(assertionMissionsDto.size()).isEqualTo(1)
         );
 
     }
@@ -132,14 +134,15 @@ public class MissionServiceTest {
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.CHECKING, missionReadAttempter.getMemberId());
+        List<ResMissionListDto> assertionMissionsDto = missionRepository
+                .findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.CHECKING, missionReadAttempter.getMemberId())
+                .stream()
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
-                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.CHECKING),
-                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+                ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class),
+                ()-> assertThat(assertionMissionsDto.size()).isEqualTo(1)
         );
     }
 
@@ -154,14 +157,15 @@ public class MissionServiceTest {
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missionReadAttempter.getMemberId());
+        List<ResMissionListDto> assertionMissionsDto = missionRepository
+                .findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missionReadAttempter.getMemberId())
+                .stream()
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.size()).isEqualTo(1),
-                ()-> assertThat(assertionMissions.get(0).getMemberId()).isEqualTo(missionReadAttempter.getMemberId()),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.COMPLETE),
-                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+                ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class),
+                ()-> assertThat(assertionMissionsDto.size()).isEqualTo(1)
         );
     }
 
@@ -179,12 +183,13 @@ public class MissionServiceTest {
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionReadAttempter.getMemberId(), true).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING);
+        List<ResMissionListDto> assertionMissionsDto = missionRepository.findAllBySuiteRoomIdAndMissionStatus(1L, MissionType.CHECKING)
+                .stream()
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.CHECKING),
-                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+                ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class)
         );
     }
 

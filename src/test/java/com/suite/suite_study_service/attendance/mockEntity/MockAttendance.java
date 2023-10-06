@@ -47,7 +47,6 @@ public class MockAttendance {
     public static ReqAttendanceDto getReqAttendanceDto() {
         return ReqAttendanceDto.builder()
                 .suiteRoomId(1L)
-                .hostId(1L)
                 .code(456).build();
     }
 
