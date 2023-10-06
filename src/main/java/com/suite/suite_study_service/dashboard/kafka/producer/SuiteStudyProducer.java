@@ -1,6 +1,7 @@
 package com.suite.suite_study_service.dashboard.kafka.producer;
 
 import com.suite.suite_study_service.attendance.repository.AttendanceAggregationRepository;
+import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.mission.dto.MissionType;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class SuiteStudyProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final MissionRepository missionRepository;
-    private final AttendanceAggregationRepository attendanceAggregationRepository;
+    private final AttendanceRepository attendanceRepository;
 
     @Value("${topic.HALLOFFAME-SELECTION}") private String HALLOFFAME_SELECTION;
     @Value("Stop-Study") private String STOP_STUDY;
@@ -60,7 +61,7 @@ public class SuiteStudyProducer {
     }
 
     private int getAttendanceRate(Long suiteRoomId, Long memberId, int leaderAttendanceCount) {
-        return (int) ((attendanceAggregationRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId) / (float)leaderAttendanceCount) * 100);
+        return (int) ((attendanceRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId) / (float)leaderAttendanceCount) * 100);
     }
 
     private Map<String, Object> makeData(Long suiteRoomId, String title, List<String> participantIds, List<String> participantNames, List<Integer> participantMissions, List<Integer> participantAttendances) {

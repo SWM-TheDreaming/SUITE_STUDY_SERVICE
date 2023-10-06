@@ -1,6 +1,6 @@
 package com.suite.suite_study_service.dashboard.service;
 
-import com.suite.suite_study_service.attendance.repository.AttendanceAggregationRepository;
+
 import com.suite.suite_study_service.attendance.repository.AttendanceRepository;
 import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
