@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface AttendanceAggregationRepository {
     List<GroupOfAttendanceDto> filterByGroupBySuiteRoomIdAndRound(Long suiteRoomId);
     List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId);

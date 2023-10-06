@@ -8,11 +8,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DashBoardAvgDto {
     private Long suiteRoomId;
-    private Long memberId;
 
     @Builder
-    public DashBoardAvgDto(Long suiteRoomId, Long memberId) {
+    public DashBoardAvgDto(Long suiteRoomId) {
         this.suiteRoomId = suiteRoomId;
-        this.memberId = memberId;
     }
 }

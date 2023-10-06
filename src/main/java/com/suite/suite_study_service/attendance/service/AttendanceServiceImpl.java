@@ -39,9 +39,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public void registerAttendanceGuest(ReqAttendanceDto reqAttendanceDto, long memberId) {
-        DashBoard dashBoard = dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqAttendanceDto.getSuiteRoomId(), memberId, false).orElseThrow(
+        DashBoard leaderDashBoard = dashBoardRepository.findBySuiteRoomIdAndIsHost(reqAttendanceDto.getSuiteRoomId(), true).orElseThrow(
                 () -> new CustomException(StatusCode.FORBIDDEN));
-        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomIdAndRound(dashBoard.getSuiteRoomId());
+        List<GroupOfAttendanceDto> groupOfAttendanceDtoList = attendanceRepository.filterByGroupBySuiteRoomIdAndRound(leaderDashBoard.getSuiteRoomId());
 
         int round = groupOfAttendanceDtoList.size();
         if(round == 0) throw new CustomException(StatusCode.TIMEOUT_ATTENDANCE);
@@ -50,7 +50,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         attendanceRepository.findBySuiteRoomIdAndMemberIdAndRound(reqAttendanceDto.getSuiteRoomId(), memberId, round).ifPresent(
                 attendance -> {throw new CustomException(StatusCode.ALREADY_ATTENDANCE);});
         if(code != reqAttendanceDto.getCode()) throw new CustomException(StatusCode.INVALID_ATTENDANCE_CODE);
-        compareAttendanceTime(reqAttendanceDto.getSuiteRoomId(), reqAttendanceDto.getHostId(), round, false);
+        compareAttendanceTime(reqAttendanceDto.getSuiteRoomId(), leaderDashBoard.getMemberId(), round, false);
 
         attendanceRepository.save(reqAttendanceDto.toAttendance(memberId, round));
     }
