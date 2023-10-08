@@ -74,7 +74,8 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
     @Override
     public int getMissionCount(Long suiteRoomId, Long memberId) {
         QMission m = mission;
-        return jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId), m.memberId.eq(memberId)).groupBy(m.suiteRoomId).fetchOne().intValue();
+        Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.suiteRoomId.eq(suiteRoomId).and(m.memberId.eq(memberId))).groupBy(m.suiteRoomId, m.memberId).fetchOne();
+        return Optional.ofNullable(countResult).orElse(0L).intValue();
     }
 
 }
