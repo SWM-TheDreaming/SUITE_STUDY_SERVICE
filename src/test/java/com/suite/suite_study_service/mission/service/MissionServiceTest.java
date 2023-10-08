@@ -263,8 +263,7 @@ public class MissionServiceTest {
         //when
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
 
-        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(1L,  MissionType.PROGRESS)
-                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(1L,  MissionType.PROGRESS).get();
 
         if (isHost) assertionMission.updateMissionStatus(MissionType.COMPLETE);
         //then
