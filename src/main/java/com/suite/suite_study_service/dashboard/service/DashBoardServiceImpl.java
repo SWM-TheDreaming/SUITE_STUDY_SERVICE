@@ -13,6 +13,7 @@ import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -57,6 +58,7 @@ public class DashBoardServiceImpl implements DashBoardService {
     }
 
     @Override
+    @Transactional
     public void terminateStudy(long suiteRoomId) {
         DashBoard leaderDashBoard = dashBoardRepository.findBySuiteRoomIdAndIsHost(suiteRoomId, true).orElseThrow(
                 () -> new CustomException(StatusCode.FORBIDDEN));
@@ -104,7 +106,7 @@ public class DashBoardServiceImpl implements DashBoardService {
         }
         Double avgAttendance = (double) totalDaysDifference / (attendanceDateList.size() - 1);
 
-        return attendanceDateList.size() > 1 ? Math.ceil((avgAttendance / studyDay) * 1000) / 1000 : 0;
+        return attendanceDateList.size() > 1 ? Math.ceil((avgAttendance / studyDay)* 1000) / 1000  : 0;
     }
 
 

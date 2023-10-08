@@ -26,7 +26,7 @@ public class DashBoardController {
     }
 
     @PostMapping("/terminate")
-    public ResponseEntity<Message> getCount(@RequestBody Map<String, Long> suite) {
+    public ResponseEntity<Message> terminateSuiteRoom(@RequestBody Map<String, Long> suite) {
         dashBoardService.terminateStudy(suite.get("suiteRoomId"));
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }

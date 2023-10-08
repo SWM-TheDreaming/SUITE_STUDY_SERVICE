@@ -16,7 +16,6 @@ public class ResSuiteRoomInfoDto {
     private Timestamp studyDeadline;
 
     @Builder
-
     public ResSuiteRoomInfoDto(Long suiteRoomId, Boolean isStart, String title, Timestamp studyStartDate, Timestamp studyDeadline) {
         this.suiteRoomId = suiteRoomId;
         this.isStart = isStart;

@@ -35,7 +35,6 @@ public class LogAop {
             log.info("parameter type = {}", arg.getClass().getSimpleName());
             log.info("parameter value = {}", arg);
         }
-
     }
 
     @AfterReturning(value = "cut()", returning = "returnObj")

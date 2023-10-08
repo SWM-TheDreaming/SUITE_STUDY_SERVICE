@@ -27,7 +27,7 @@ public class SuiteStudyProducer {
     private final AttendanceRepository attendanceRepository;
 
     @Value("${topic.HALLOFFAME-SELECTION}") private String HALLOFFAME_SELECTION;
-    @Value("Stop-Study") private String STOP_STUDY;
+    @Value("Study-Stop") private String STUDY_STOP;
     public void sendMessage(String topic, String data) {
         log.info("{} message : {}", topic, data);
         this.kafkaTemplate.send(topic, data);
@@ -51,17 +51,18 @@ public class SuiteStudyProducer {
                     participantMissions.add(getMissionRate(suiteRoomId, dashBoard.getMemberId()));
                     participantAttendances.add(getAttendanceRate(suiteRoomId, dashBoard.getMemberId(), leaderAttendanceCount));
                 });
-        this.kafkaTemplate.send(STOP_STUDY, makeMessage(makeData(suiteRoomId, title, participantIds, participantNames, participantMissions, participantAttendances)));
+        this.kafkaTemplate.send(STUDY_STOP, makeMessage(makeData(suiteRoomId, title, participantIds, participantNames, participantMissions, participantAttendances)));
     }
 
     private int getMissionRate(Long suiteRoomId, Long memberId) {
         float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(suiteRoomId, memberId).size();
         float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(suiteRoomId, MissionType.COMPLETE, memberId).size();
-        return (int) ((missionTrueCount / missionCount) * 100);
+
+        return (int) Math.ceil((missionTrueCount / missionCount) * 100);
     }
 
     private int getAttendanceRate(Long suiteRoomId, Long memberId, int leaderAttendanceCount) {
-        return (int) ((attendanceRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId) / (float)leaderAttendanceCount) * 100);
+        return (int) Math.ceil((attendanceRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId) / (float)leaderAttendanceCount) * 100);
     }
 
     private Map<String, Object> makeData(Long suiteRoomId, String title, List<String> participantIds, List<String> participantNames, List<Integer> participantMissions, List<Integer> participantAttendances) {
