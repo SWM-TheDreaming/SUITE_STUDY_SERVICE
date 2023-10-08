@@ -3,17 +3,14 @@ package com.suite.suite_study_service.mission.service;
 import com.suite.suite_study_service.common.handler.CustomException;
 import com.suite.suite_study_service.common.handler.StatusCode;
 import com.suite.suite_study_service.common.security.dto.AuthorizerDto;
-
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
 import com.suite.suite_study_service.mission.dto.*;
 import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -82,10 +79,9 @@ public class MissionServiceImpl implements MissionService{
     @Transactional
     public void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
-        Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
+        boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
         Mission mission = missionRepository.findByMissionIdAndMissionStatus(reqMissionApprovalDto.getMissionId(),MissionType.PROGRESS)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + isHost);
         if(isHost) mission.updateMissionStatus(MissionType.COMPLETE);
         else mission.updateMissionStatus(MissionType.CHECKING);
     }

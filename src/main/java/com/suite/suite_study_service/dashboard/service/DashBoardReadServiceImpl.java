@@ -34,7 +34,7 @@ public class DashBoardReadServiceImpl implements DashBoardReadService {
         double attendanceAvg = attendanceRateList.size() != 0 ? attendanceSum / attendanceRateList.size() : 0;
 
         AttendanceAvgDto attendanceAvgDto = AttendanceAvgDto.builder()
-                .attendanceAvgRate(attendanceAvg)
+                .attendanceAvgRate(Math.ceil(attendanceAvg * 100) / 100)
                 .attendanceCompleteCount(attendanceRepository.getAllAttendanceCount(memberId)).build();
 
         MissionAvgDto missionAvgDto = missionRepository.getMissionAvg(memberId);
