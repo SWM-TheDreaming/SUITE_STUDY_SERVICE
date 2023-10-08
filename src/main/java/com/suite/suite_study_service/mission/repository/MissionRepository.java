@@ -24,5 +24,7 @@ public interface MissionRepository extends JpaRepository<Mission, Long>, Mission
     Boolean existsBySuiteRoomIdAndMissionStatus(Long suiteRoomId, MissionType missionType);
     Optional<Mission> findByMissionIdAndMissionStatus(Long missionId, MissionType missionType);
 
+    void deleteBySuiteRoomId(Long suiteRoomId);
+
 
 }

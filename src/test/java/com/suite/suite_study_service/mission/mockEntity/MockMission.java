@@ -59,7 +59,7 @@ public class MockMission {
                 .build();
     }
 
-    public static ReqMissionApprovalDto getReqMissionApprovalDto(Long suiteRoomId, Long missionId) {
+    public static ReqMissionApprovalDto getReqMissionApprovalDto(Long missionId) {
         return ReqMissionApprovalDto.builder()
                 .suiteRoomId(1L)
                 .missionId(missionId)
@@ -73,9 +73,10 @@ public class MockMission {
                 .build();
     }
 
-    public static Mission newMission (Long memberId, MissionType missionType, String missionName, Timestamp missionDeadLine) {
+    public static Mission newMission (Long missionId ,Long memberId, MissionType missionType, String missionName, Timestamp missionDeadLine) {
         return Mission.builder()
                 .suiteRoomId(1L)
+                .missionId(missionId)
                 .memberId(memberId)
                 .missionName(missionName)
                 .missionDeadLine(missionDeadLine)

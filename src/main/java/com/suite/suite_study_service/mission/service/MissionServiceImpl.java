@@ -33,7 +33,7 @@ public class MissionServiceImpl implements MissionService{
                 .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
 
-        missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(1L, reqMissionDto.getMissionName(), missionCreateAttempter.getMemberId())
+        missionRepository.findBySuiteRoomIdAndMissionNameAndMemberId(reqMissionDto.getSuiteRoomId(), reqMissionDto.getMissionName(), missionCreateAttempter.getMemberId())
                 .ifPresent(result -> {throw new CustomException(StatusCode.ALREADY_EXISTS_MISSION);});
 
 
@@ -119,8 +119,11 @@ public class MissionServiceImpl implements MissionService{
     @Override
     @Transactional
     public void updateMissionStatusCheckingToProgress(Long missionId) {
+        AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
         Mission cancleRequiredMission = missionRepository.findByMissionIdAndMissionStatus(missionId, MissionType.CHECKING)
-                .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+                .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(cancleRequiredMission.getSuiteRoomId(), missionApprovalRequester.getMemberId(), true).orElseThrow(
+                () -> new CustomException(StatusCode.FORBIDDEN));
         cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
     }
 }

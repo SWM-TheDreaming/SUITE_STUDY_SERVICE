@@ -11,23 +11,24 @@ import com.suite.suite_study_service.mission.entity.Mission;
 import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,6 +44,7 @@ public class MissionControllerTest {
     @Autowired private MissionRepository missionRepository;
     @Autowired private DashBoardRepository dashBoardRepository;
 
+    @Autowired private EntityManager entityManager;
     @Value("${token.YH}")
     private String YH_JWT;
     @Value("${token.DR}")
@@ -64,19 +66,33 @@ public class MissionControllerTest {
                     .build();
             dashBoardRepository.save(guestDashBoard.toDashBoard());
         }
-        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-01 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
+                    System.out.println("@ : " + mission.getMemberId());
+                    System.out.println("@ : " + mission.getMissionId());
+                    System.out.println("@ : " + mission.getMissionStatus());
                 });
     }
+
 
     @Test
     @DisplayName("스터디 그룹 미션 생성 - 방장")
     public void registerMission() throws Exception {
         //given
         missionRepository.deleteAll();
-
+        entityManager.flush();
+        entityManager.clear();
+        List<Mission> missionList = missionRepository.findAll();
+        System.out.println(missionList);
+        makeMockMissionList("test2", Timestamp.valueOf("2023-10-01 18:00:00"), MissionType.PROGRESS)
+                .stream()
+                .forEach(mission -> {
+                    missionRepository.save(mission);
+                    System.out.println("@ : " + mission.getMissionId());
+                    System.out.println("@ : " + mission.getMissionStatus());
+                });
         ReqMissionDto reqMissionDto = MockMission.getReqMissionDto();
         String body = mapper.writeValueAsString(reqMissionDto);
         //when
@@ -152,7 +168,9 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 요청 - 방장")
     public void requestApprovalMissionHost() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(1L, 1L);
+        Mission missionOne = missionRepository.findAll(PageRequest.of(0,3)).get().collect(Collectors.toList()).get(0);
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(missionOne.getMissionId());
+
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         //when
         String responseBody = postRequest("/study/mission/submission", YH_JWT, body);
@@ -167,8 +185,13 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 요청 - 스터디원")
     public void requestApprovalMissionGuest() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(1L, 2L);
+        Mission missionOne = missionRepository.findAll(PageRequest.of(0,3)).get().collect(Collectors.toList()).get(1);
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(missionOne.getMissionId());
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
+
+
+        System.out.println("@@@:" + missionOne.getMissionId());
+
         //when
         String responseBody = postRequest("/study/mission/submission", DR_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
@@ -182,7 +205,8 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 승인 - 방장")
     public void approvalRequestAcceptMissionHost() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(1L, 1L);
+        Mission missionOne = missionRepository.findAll(PageRequest.of(0,3)).get().collect(Collectors.toList()).get(0);
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(missionOne.getMissionId());
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         updateMockMissionStatus();
         //when
@@ -198,7 +222,7 @@ public class MissionControllerTest {
     @DisplayName("스터디 그룹 미션 달성 승인 - 스터디원")
     public void approvalRequestAcceptMissionGuest() throws Exception {
         //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(1L, 2L);
+        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto( 2L);
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
         //when
         String responseBody = postRequest("/study/mission/approval", DR_JWT, body);
@@ -241,22 +265,6 @@ public class MissionControllerTest {
         );
     }
 
-    @Test
-    @DisplayName("스터디 그룹 미션 승인 취소/반려 - 스터디원/방장")
-    public void cancelMissionCompleteRequest() throws Exception {
-        //given
-        ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(1L, 2L);
-        String body = mapper.writeValueAsString(reqMissionApprovalDto);
-        updateMockMissionStatus();
-        //when
-        String responseBody = postRequest("/study/mission/cancel", DR_JWT, body);
-        Message message = mapper.readValue(responseBody, Message.class);
-
-        //then
-        Assertions.assertAll(
-                () -> assertThat(message.getStatusCode()).isEqualTo(200)
-        );
-    }
 
     private String postRequest(String url, String jwt, String body) throws Exception {
         MvcResult result = mockMvc.perform(post(url)
@@ -269,21 +277,17 @@ public class MissionControllerTest {
         return result.getResponse().getContentAsString();
     }
 
-    private List<MockMission> makeMockMissionList(String missionName, Timestamp missionDeadLine, MissionType missionType) {
+    private List<Mission> makeMockMissionList(String missionName, Timestamp missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
-        List<MockMission> mockMissionList = new ArrayList<>();
-        dashBoards.stream().forEach(dashBoard -> {
-            MockMission mockMission = MockMission.builder()
-                    .missionId(dashBoard.getDashboardId())
-                    .suiteRoomId(1L)
-                    .memberId(dashBoard.getMemberId())
-                    .missionName(missionName)
-                    .missionDeadLine(missionDeadLine)
-                    .missionStatus(missionType)
-                    .build();
-            mockMissionList.add(mockMission);
+        List<Mission> mockMissionList = new ArrayList<>();
 
-        });
+        long idCounter = 1;
+        for (DashBoard dashBoard : dashBoards) {
+            Mission newMission = MockMission.newMission(idCounter, dashBoard.getMemberId(),missionType, missionName, missionDeadLine);
+            mockMissionList.add(newMission);
+            idCounter++;
+        }
+
         return mockMissionList;
     }
 

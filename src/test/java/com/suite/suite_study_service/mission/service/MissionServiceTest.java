@@ -422,11 +422,11 @@ public class MissionServiceTest {
                     missionRepository.save(mission);
                 });
         //when
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@" + missioncancelRequester.getMemberId());
+
         float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missioncancelRequester.getMemberId()).size();
         float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missioncancelRequester.getMemberId()).size();
         List<Mission> temp = missionRepository.findAllBySuiteRoomId(1L);
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@" + temp.toString());
+
 
         int missionRate = (int) Math.ceil((missionTrueCount / missionCount) * 100);
         //then
@@ -443,14 +443,14 @@ public class MissionServiceTest {
     private List<Mission> makeMockMissionList(String missionName, Timestamp missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
         List<Mission> mockMissionList = new ArrayList<>();
-        dashBoards.stream().forEach(dashBoard -> {
-            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@" + dashBoard.getMemberId());
-//            Mission newMission = MockMission.newMi
-            Mission newMission = MockMission.newMission(dashBoard.getMemberId(), missionType, missionName, missionDeadLine);
 
+        long idCounter = 1;
+        for (DashBoard dashBoard : dashBoards) {
+            Mission newMission = MockMission.newMission(idCounter, dashBoard.getMemberId() ,missionType, missionName, missionDeadLine);
             mockMissionList.add(newMission);
+            idCounter++;
+        }
 
-        });
         return mockMissionList;
     }
 
