@@ -51,45 +51,31 @@ public class MissionServiceImpl implements MissionService{
     @Override
     @Transactional
     public List<ResMissionListDto> getRequestedMissions(ReqMissionListDto reqMissionListDto) {
-        try {
-            AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
-            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId(), true)
-                    .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
+        AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
+        dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionListDto.getSuiteRoomId(), missionReadAttemper.getMemberId(), true)
+                .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
-                    .stream()
-                    .filter(mission -> isTimeOutMissions(mission, now))
-                    .filter(Objects::nonNull)
-                    .map(mission -> mission.toResMissionListDto())
-                    .collect(Collectors.toList());
+        List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatus(reqMissionListDto.getSuiteRoomId(), MissionType.CHECKING)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
 
 
-            return missionList;
-        } catch (Exception exception) {
-            throw new CustomException(StatusCode.NOT_FOUND);
-        }
+        return missionList;
     }
 
     @Override
     @Transactional
     public List<ResMissionListDto> getMissions(ReqMissionListDto reqMissionListDto) {
-        try {
-            AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
-                    .stream()
-                    .filter(mission -> isTimeOutMissions(mission, now))
-                    .filter(Objects::nonNull)
-                    .map(mission -> mission.toResMissionListDto())
-                    .collect(Collectors.toList());
+        AuthorizerDto missionReadAttemper = getSuiteAuthorizer();
+        List<ResMissionListDto> missionList = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(reqMissionListDto.getSuiteRoomId(), MissionType.valueOf(reqMissionListDto.getMissionTypeString()), missionReadAttemper.getMemberId())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(mission -> mission.toResMissionListDto())
+                .collect(Collectors.toList());
 
-
-            return missionList;
-        } catch (Exception exception) {
-            throw new CustomException(StatusCode.NOT_FOUND);
-        }
-
+        return missionList;
     }
 
     @Override
@@ -140,16 +126,5 @@ public class MissionServiceImpl implements MissionService{
         Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(suiteRoomId, missionName, memberId, MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
         cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
-    }
-
-    private boolean isTimeOutMissions(Mission mission, Timestamp now) {
-        if (mission.getMissionDeadLine().getTime() - now.getTime() < 0) {
-            if(mission.getMissionStatus() == MissionType.COMPLETE) {
-                return true;
-            }
-            mission.updateMissionStatus(MissionType.COMPLETE);
-            return false;
-        }
-        return true;
     }
 }
