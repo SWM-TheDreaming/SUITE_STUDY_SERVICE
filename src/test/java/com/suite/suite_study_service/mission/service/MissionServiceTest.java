@@ -81,8 +81,7 @@ public class MissionServiceTest {
         Assertions.assertAll(
                 ()-> assertThat(assertionMissions.get(0).getClass()).isEqualTo(Mission.class),
                 ()-> assertThat(assertionMissions.size()).isEqualTo(3),
-                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS),
-                ()-> assertThat(assertionMissions.get(0).isResult()).isEqualTo(false)
+                ()-> assertThat(assertionMissions.get(0).getMissionStatus()).isEqualTo(MissionType.PROGRESS)
         );
     }
 
@@ -454,7 +453,6 @@ public class MissionServiceTest {
                     .missionName(missionName)
                     .missionDeadLine(missionDeadLine)
                     .missionStatus(missionType)
-                    .result(false)
                     .build();
             mockMissionList.add(mockMission);
 

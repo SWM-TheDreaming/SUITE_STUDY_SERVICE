@@ -1,7 +1,6 @@
 package com.suite.suite_study_service.dashboard.kafka.consumer;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suite.suite_study_service.dashboard.entity.DashBoard;
 import com.suite.suite_study_service.dashboard.kafka.producer.SuiteStudyProducer;
 import com.suite.suite_study_service.dashboard.repository.DashBoardRepository;
