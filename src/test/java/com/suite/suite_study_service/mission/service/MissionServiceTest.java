@@ -115,6 +115,8 @@ public class MissionServiceTest {
                 .stream()
                 .map(mission -> mission.toResMissionListDto())
                 .collect(Collectors.toList());
+
+
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class),
@@ -166,6 +168,7 @@ public class MissionServiceTest {
         Assertions.assertAll(
                 ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class),
                 ()-> assertThat(assertionMissionsDto.size()).isEqualTo(1)
+
         );
     }
 
@@ -190,6 +193,8 @@ public class MissionServiceTest {
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMissionsDto.get(0).getClass()).isNotEqualTo(Mission.class)
+
+
         );
     }
 
@@ -399,6 +404,42 @@ public class MissionServiceTest {
                 ()-> assertThat(cancleRequiredMission.getMissionStatus()).isEqualTo(MissionType.PROGRESS),
                 ()-> assertThat(cancleRequiredMission.getMissionName()).isEqualTo("test"),
                 ()-> assertThat(cancleRequiredMission.getMemberId()).isEqualTo(1L)
+        );
+
+    }
+
+    @Test
+    @DisplayName("최종 미션 달성률 계산")
+    public void getMissionRate() {
+        //given
+        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
+        makeMockMissionList("complete & true mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    Mission mission = mockMission.toMission();
+                    mission.updateMissionStatusAndResult();
+                    missionRepository.save(mission);
+                });
+        makeMockMissionList("complete & false mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        makeMockMissionList("complete & false mission2", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+
+        float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missionCancleRequester.getMemberId()).size();
+        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(1L, MissionType.COMPLETE, missionCancleRequester.getMemberId(), true).size();
+        int missionRate = (int) ((missionTrueCount / missionCount) * 100);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(missionCount).isEqualTo(3),
+                ()-> assertThat(missionTrueCount).isEqualTo(1),
+                ()-> assertThat(missionRate).isEqualTo(33)
         );
 
     }
