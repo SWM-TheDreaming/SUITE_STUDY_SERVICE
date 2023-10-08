@@ -255,21 +255,19 @@ public class MissionServiceTest {
     public void updateMissionStatusProgressToCheckingHost() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.YH();
-        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
+        List<Mission> m = makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mission -> {
-                    missionRepository.save(mission);
-                });
+                .map(mission ->
+                        missionRepository.save(mission)).collect(Collectors.toList());
         //when
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
+        Mission assertRequiredMission = missionRepository.findByMissionIdAndMissionStatus(m.get(m.size() - 1).getMissionId(), MissionType.CHECKING).get();
 
-        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(1L,  MissionType.PROGRESS).get();
-
-        if (isHost) assertionMission.updateMissionStatus(MissionType.COMPLETE);
+        if (isHost) assertRequiredMission.updateMissionStatus(MissionType.COMPLETE);
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMission.getMissionStatus()).isEqualTo(MissionType.COMPLETE),
-                ()-> assertThat(assertionMission.getClass()).isEqualTo(Mission.class)
+                ()-> assertThat(assertRequiredMission.getMissionStatus()).isEqualTo(MissionType.COMPLETE),
+                ()-> assertThat(assertRequiredMission.getClass()).isEqualTo(Mission.class)
         );
     }
 
