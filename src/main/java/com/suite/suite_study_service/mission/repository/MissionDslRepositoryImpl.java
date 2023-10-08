@@ -49,7 +49,7 @@ public class MissionDslRepositoryImpl implements MissionDslRepository {
     public MissionAvgDto getMissionAvg(Long memberId) {
         QMission m = mission;
 
-        Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.memberId.eq(memberId)).groupBy(m.suiteRoomId, m.memberId).fetchOne();
+        Long countResult = jpaQueryFactory.select(m.count()).from(m).where(m.memberId.eq(memberId)).groupBy(m.memberId).fetchOne();
         int cnt = Optional.ofNullable(countResult).orElse(0L).intValue();
 
         if(cnt == 0) return MissionAvgDto.builder().missionAvgRate(0.0).missionCompleteCount(0).build();
