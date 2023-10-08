@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/study")
@@ -55,8 +57,8 @@ public class MissionController {
     }
 
     @PostMapping("/mission/cancel")
-    public ResponseEntity<Message> cancelMissionCompleteRequest(@RequestBody ReqMissionApprovalDto reqMissionApprovalDto) {
-        missionService.updateMissionStatusCheckingToProgress(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId());
+    public ResponseEntity<Message> cancelMissionCompleteRequest(@RequestBody Map<String, Long> suiteRoom) {
+        missionService.updateMissionStatusCheckingToProgress(suiteRoom.get("missionId"));
         return ResponseEntity.ok(new Message(StatusCode.OK));
     }
 

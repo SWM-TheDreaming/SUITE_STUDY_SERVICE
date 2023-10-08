@@ -43,7 +43,7 @@ public class MissionServiceImpl implements MissionService{
         dashBoardRepository.findAllBySuiteRoomId(reqMissionDto.getSuiteRoomId())
                 .stream()
                 .forEach(dashBoard -> {
-                    missionRepository.save(reqMissionDto.toMission(dashBoard.getMemberId()));
+                    missionRepository.save(reqMissionDto.toMission(dashBoard.getMemberId(), dashBoard.getNickName()));
                 });
     }
 
@@ -83,10 +83,10 @@ public class MissionServiceImpl implements MissionService{
     public void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto) {
         AuthorizerDto missionApprovalRequester = getSuiteAuthorizer();
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId()).get().isHost();
-        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
+        Mission mission = missionRepository.findByMissionIdAndMissionStatus(reqMissionApprovalDto.getMissionId(),MissionType.PROGRESS)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
-
-        if(isHost) mission.updateMissionStatusAndResult();
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + isHost);
+        if(isHost) mission.updateMissionStatus(MissionType.COMPLETE);
         else mission.updateMissionStatus(MissionType.CHECKING);
     }
 
@@ -97,9 +97,9 @@ public class MissionServiceImpl implements MissionService{
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(reqMissionApprovalDto.getSuiteRoomId(), missionApprovalRequester.getMemberId(), true)
                 .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
 
-        Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(reqMissionApprovalDto.getSuiteRoomId(), reqMissionApprovalDto.getMissionName(), reqMissionApprovalDto.getMemberId(), MissionType.CHECKING)
+        Mission mission = missionRepository.findByMissionIdAndMissionStatus(reqMissionApprovalDto.getMissionId(), MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.NOT_FOUND));
-        mission.updateMissionStatusAndResult();
+        mission.updateMissionStatus(MissionType.COMPLETE);
     }
 
     @Override
@@ -122,8 +122,8 @@ public class MissionServiceImpl implements MissionService{
 
     @Override
     @Transactional
-    public void updateMissionStatusCheckingToProgress(Long suiteRoomId, String missionName, Long memberId) {
-        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(suiteRoomId, missionName, memberId, MissionType.CHECKING)
+    public void updateMissionStatusCheckingToProgress(Long missionId) {
+        Mission cancleRequiredMission = missionRepository.findByMissionIdAndMissionStatus(missionId, MissionType.CHECKING)
                 .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
         cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
     }

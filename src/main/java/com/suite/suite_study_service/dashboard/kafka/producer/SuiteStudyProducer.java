@@ -56,7 +56,7 @@ public class SuiteStudyProducer {
 
     private int getMissionRate(Long suiteRoomId, Long memberId) {
         float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(suiteRoomId, memberId).size();
-        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(suiteRoomId, MissionType.COMPLETE, memberId, true).size();
+        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(suiteRoomId, MissionType.COMPLETE, memberId).size();
         return (int) ((missionTrueCount / missionCount) * 100);
     }
 

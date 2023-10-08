@@ -240,7 +240,7 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
+        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.PROGRESS)
                 .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
 
         assertionMission.updateMissionStatus(MissionType.CHECKING);
@@ -265,7 +265,7 @@ public class MissionServiceTest {
         //when
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
 
-        Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.PROGRESS)
+        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(1L,  MissionType.PROGRESS)
                 .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
 
         if (isHost) assertionMission.updateMissionStatus(MissionType.COMPLETE);
@@ -290,14 +290,13 @@ public class MissionServiceTest {
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        Mission assertionMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", missionApprovalRequester.getMemberId(), MissionType.CHECKING)
+        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.CHECKING)
                 .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
 
-        assertionMission.updateMissionStatusAndResult();
+        assertionMission.updateMissionStatus(MissionType.COMPLETE);
         //then
         Assertions.assertAll(
                 ()-> assertThat(assertionMission.getMissionStatus()).isEqualTo(MissionType.COMPLETE),
-                ()-> assertThat(assertionMission.isResult()).isEqualTo(true),
                 ()-> assertThat(assertionMission.getClass()).isEqualTo(Mission.class)
         );
     }
@@ -395,7 +394,7 @@ public class MissionServiceTest {
                     missionRepository.save(mockMission.toMission());
                 });
         //when
-        Mission cancleRequiredMission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", 1L, MissionType.CHECKING)
+        Mission cancleRequiredMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.CHECKING)
                 .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
 
         cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
@@ -417,15 +416,14 @@ public class MissionServiceTest {
                 .stream()
                 .forEach(mockMission -> {
                     Mission mission = mockMission.toMission();
-                    mission.updateMissionStatusAndResult();
                     missionRepository.save(mission);
                 });
-        makeMockMissionList("complete & false mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+        makeMockMissionList("fail mission 1", "2023-10-01 18:00:00", MissionType.FAIL)
                 .stream()
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
                 });
-        makeMockMissionList("complete & false mission2", "2023-10-01 18:00:00", MissionType.COMPLETE)
+        makeMockMissionList("complete & false mission2", "2023-10-01 18:00:00", MissionType.FAIL)
                 .stream()
                 .forEach(mockMission -> {
                     missionRepository.save(mockMission.toMission());
@@ -433,7 +431,7 @@ public class MissionServiceTest {
         //when
 
         float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missionCancleRequester.getMemberId()).size();
-        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(1L, MissionType.COMPLETE, missionCancleRequester.getMemberId(), true).size();
+        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missionCancleRequester.getMemberId()).size();
         int missionRate = (int) ((missionTrueCount / missionCount) * 100);
         //then
         Assertions.assertAll(

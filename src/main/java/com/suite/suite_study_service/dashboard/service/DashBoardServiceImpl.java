@@ -68,7 +68,7 @@ public class DashBoardServiceImpl implements DashBoardService {
                 member -> member.checkAttendance(attendanceRepository.getAttendanceCountForMember(suiteRoomId, member.getMemberId()), leaderAttendanceCount)).collect(Collectors.toList());
 
         boolean isAllAttendance = attendanceList.stream().allMatch(Boolean::booleanValue);
-        boolean isAllMission = !missionRepository.existsBySuiteRoomIdAndResult(suiteRoomId, false);
+        boolean isAllMission = !missionRepository.existsBySuiteRoomIdAndMissionStatus(suiteRoomId, MissionType.FAIL);
         if(isAllAttendance && isAllMission) {
             List<Date> attendanceDateList = attendanceRepository.getAttendanceDatesBySuiteRoomIdAndMemberId(suiteRoomId, leaderDashBoard.getMemberId());
             Double attendanceFrequency = getAttendanceDateSum(attendanceDateList, getBetweenDate(resSuiteRoomInfoDto.getStudyStartDate(), resSuiteRoomInfoDto.getStudyDeadline()));

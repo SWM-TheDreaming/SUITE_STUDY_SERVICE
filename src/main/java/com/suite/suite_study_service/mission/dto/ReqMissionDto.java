@@ -21,14 +21,14 @@ public class ReqMissionDto {
         this.missionDeadLine = missionDeadLine;
     }
 
-    public Mission toMission(Long memberId) {
+    public Mission toMission(Long memberId, String nickName) {
         return Mission.builder()
                 .suiteRoomId(this.suiteRoomId)
                 .memberId(memberId)
+                .nickName(nickName)
                 .missionName(this.missionName)
                 .missionDeadLine(this.missionDeadLine)
                 .missionStatus(MissionType.PROGRESS)
-                .result(false)
                 .build();
     }
 }

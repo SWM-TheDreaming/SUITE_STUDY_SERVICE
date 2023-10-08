@@ -288,10 +288,12 @@ public class MissionControllerTest {
 
     private void updateMockMissionStatus() {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
+
         dashBoards.stream().forEach(dashBoard -> {
-            Mission mission = missionRepository.findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(1L, "test", dashBoard.getMemberId(), MissionType.PROGRESS)
+            Mission mission = missionRepository.findByMissionIdAndMissionStatus(dashBoard.getDashboardId(), MissionType.PROGRESS)
                     .orElseThrow(()->new CustomException(StatusCode.NOT_FOUND));
             mission.updateMissionStatus(MissionType.CHECKING);
+
         });
     }
 

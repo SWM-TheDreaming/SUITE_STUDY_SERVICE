@@ -21,9 +21,8 @@ public interface MissionRepository extends JpaRepository<Mission, Long>, Mission
 
     List<Mission> findAllBySuiteRoomIdAndMissionName(Long suiteRoomId, String missionName);
     Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberId(Long suiteRoomId, String missionName, Long memberId);
-    Boolean existsBySuiteRoomIdAndResult(Long suiteRoomId, Boolean result);
-    Optional<Mission> findBySuiteRoomIdAndMissionNameAndMemberIdAndMissionStatus(Long suiteRoomId, String missionName, Long memberId, MissionType missionType);
+    Boolean existsBySuiteRoomIdAndMissionStatus(Long suiteRoomId, MissionType missionType);
+    Optional<Mission> findByMissionIdAndMissionStatus(Long missionId, MissionType missionType);
 
-    List<Mission> findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(Long suiteRoomId, MissionType missionType, Long memberId, Boolean result);
 
 }

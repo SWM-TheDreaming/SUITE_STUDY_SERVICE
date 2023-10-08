@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReqMissionApprovalDto {
     private Long suiteRoomId;
-    private String missionName;
-    private Long memberId;
+    private Long missionId;
 
     @Builder
-    public ReqMissionApprovalDto(Long suiteRoomId, String missionName, Long memberId) {
+    public ReqMissionApprovalDto(Long suiteRoomId, Long missionId) {
         this.suiteRoomId = suiteRoomId;
-        this.missionName = missionName;
-        this.memberId = memberId;
+        this.missionId = missionId;
     }
 }

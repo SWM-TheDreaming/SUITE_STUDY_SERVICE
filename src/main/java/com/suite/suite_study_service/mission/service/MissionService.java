@@ -16,7 +16,7 @@ public interface MissionService {
 
     void deleteMission(Long suiteRoomId, String missionName);
 
-    void updateMissionStatusCheckingToProgress(Long suiteRoomId, String missionName, Long memberId);
+    void updateMissionStatusCheckingToProgress(Long missionId);
     void updateMissionStatusProgressToChecking(ReqMissionApprovalDto reqMissionApprovalDto);
 
     void updateMissionStatusCheckingToComplete(ReqMissionApprovalDto reqMissionApprovalDto);
