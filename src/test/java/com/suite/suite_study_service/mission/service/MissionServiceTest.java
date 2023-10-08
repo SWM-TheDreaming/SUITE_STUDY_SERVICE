@@ -408,6 +408,42 @@ public class MissionServiceTest {
 
     }
 
+    @Test
+    @DisplayName("최종 미션 달성률 계산")
+    public void getMissionRate() {
+        //given
+        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
+        makeMockMissionList("complete & true mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    Mission mission = mockMission.toMission();
+                    mission.updateMissionStatusAndResult();
+                    missionRepository.save(mission);
+                });
+        makeMockMissionList("complete & false mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        makeMockMissionList("complete & false mission2", "2023-10-01 18:00:00", MissionType.COMPLETE)
+                .stream()
+                .forEach(mockMission -> {
+                    missionRepository.save(mockMission.toMission());
+                });
+        //when
+
+        float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missionCancleRequester.getMemberId()).size();
+        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberIdAndResult(1L, MissionType.COMPLETE, missionCancleRequester.getMemberId(), true).size();
+        int missionRate = (int) ((missionTrueCount / missionCount) * 100);
+        //then
+        Assertions.assertAll(
+                ()-> assertThat(missionCount).isEqualTo(3),
+                ()-> assertThat(missionTrueCount).isEqualTo(1),
+                ()-> assertThat(missionRate).isEqualTo(33)
+        );
+
+    }
+
 
 
     private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {

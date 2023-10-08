@@ -28,6 +28,9 @@ public class DashBoard {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "nickname")
     private String nickName;
 
@@ -45,18 +48,18 @@ public class DashBoard {
 
 
     @Builder
-    public DashBoard(Long dashboardId, Long suiteRoomId, Long memberId, String email, String nickName, boolean isHost, int depositAmount, int minAttendanceRate, int minMissionCompleteRate) {
+    public DashBoard(Long dashboardId, Long suiteRoomId, Long memberId, String email, String name, String nickName, boolean isHost, int depositAmount, int minAttendanceRate, int minMissionCompleteRate) {
         this.dashboardId = dashboardId;
         this.suiteRoomId = suiteRoomId;
         this.memberId = memberId;
         this.email = email;
+        this.name = name;
         this.nickName = nickName;
         this.isHost = isHost;
         this.depositAmount = depositAmount;
         this.minAttendanceRate = minAttendanceRate;
         this.minMissionCompleteRate = minMissionCompleteRate;
     }
-
     public OtherDashBoardDto toOtherDashBoardDto(Double attendanceRate, Double missionRate) {
         return OtherDashBoardDto.builder()
                 .memberId(memberId)
