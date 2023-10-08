@@ -70,9 +70,6 @@ public class MissionControllerTest {
                 .stream()
                 .forEach(mission -> {
                     missionRepository.save(mission);
-                    System.out.println("@ : " + mission.getMemberId());
-                    System.out.println("@ : " + mission.getMissionId());
-                    System.out.println("@ : " + mission.getMissionStatus());
                 });
     }
 
@@ -85,13 +82,10 @@ public class MissionControllerTest {
         entityManager.flush();
         entityManager.clear();
         List<Mission> missionList = missionRepository.findAll();
-        System.out.println(missionList);
         makeMockMissionList("test2", Timestamp.valueOf("2023-10-01 18:00:00"), MissionType.PROGRESS)
                 .stream()
                 .forEach(mission -> {
                     missionRepository.save(mission);
-                    System.out.println("@ : " + mission.getMissionId());
-                    System.out.println("@ : " + mission.getMissionStatus());
                 });
         ReqMissionDto reqMissionDto = MockMission.getReqMissionDto();
         String body = mapper.writeValueAsString(reqMissionDto);
@@ -190,7 +184,6 @@ public class MissionControllerTest {
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
 
 
-        System.out.println("@@@:" + missionOne.getMissionId());
 
         //when
         String responseBody = postRequest("/study/mission/submission", DR_JWT, body);
@@ -208,7 +201,7 @@ public class MissionControllerTest {
         Mission missionOne = missionRepository.findAll(PageRequest.of(0,3)).get().collect(Collectors.toList()).get(0);
         ReqMissionApprovalDto reqMissionApprovalDto = MockMission.getReqMissionApprovalDto(missionOne.getMissionId());
         String body = mapper.writeValueAsString(reqMissionApprovalDto);
-        updateMockMissionStatus();
+        updateMockMissionStatus(missionOne.getMissionId());
         //when
         String responseBody = postRequest("/study/mission/approval", YH_JWT, body);
         Message message = mapper.readValue(responseBody, Message.class);
@@ -291,14 +284,16 @@ public class MissionControllerTest {
         return mockMissionList;
     }
 
-    private void updateMockMissionStatus() {
-        List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
+    private void updateMockMissionStatus(Long missionId) {
+//        List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
+        Mission mission = missionRepository.findByMissionIdAndMissionStatus(missionId, MissionType.PROGRESS).get();
+        mission.updateMissionStatus(MissionType.CHECKING);
 
-        dashBoards.stream().forEach(dashBoard -> {
-            Mission mission = missionRepository.findByMissionIdAndMissionStatus(dashBoard.getDashboardId(), MissionType.PROGRESS)
-                    .orElseThrow(()->new CustomException(StatusCode.NOT_FOUND));
-            mission.updateMissionStatus(MissionType.CHECKING);
-        });
+//        dashBoards.stream().forEach(dashBoard -> {
+//            Mission mission = missionRepository.findByMissionIdAndMissionStatus(dashBoard.getDashboardId(), MissionType.PROGRESS)
+//                    .orElseThrow(()->new CustomException(StatusCode.NOT_FOUND));
+//            mission.updateMissionStatus(MissionType.CHECKING);
+//        });
     }
 
 }
