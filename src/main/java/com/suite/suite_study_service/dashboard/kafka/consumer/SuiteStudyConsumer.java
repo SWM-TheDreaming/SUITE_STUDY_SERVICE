@@ -29,7 +29,7 @@ public class SuiteStudyConsumer {
     @Value("${topic.SUITEROOM_START_ERROR}") private String SUITEROOM_START_ERROR;
 
     @Transactional
-    @KafkaListener(topics = "${topic.SUITEROOM_START}", groupId = "suite", containerFactory = "kafkaListenerDefaultContainerFactory")
+    @KafkaListener(topics = "${topic.SUITEROOM_START}", groupId = "suiteRoomStartConsumers", containerFactory = "kafkaListenerDefaultContainerFactory")
     public void suiteRoomStartConsume(ConsumerRecord<String, String> record) throws IOException, ParseException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse(record.value());
