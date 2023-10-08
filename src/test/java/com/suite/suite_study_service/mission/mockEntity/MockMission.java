@@ -13,31 +13,34 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class MockMission {
+    private Long missionId;
     private Long suiteRoomId;
     private Long memberId;
     private String missionName;
     private Timestamp missionDeadLine;
     private MissionType missionStatus;
-    private boolean result;
+
+
+
 
     @Builder
-    public MockMission(Long suiteRoomId, Long memberId, String missionName, String missionDeadLine, MissionType missionStatus, boolean result) {
+    public MockMission(Long missionId, Long suiteRoomId, Long memberId, String missionName, Timestamp missionDeadLine, MissionType missionStatus) {
+        this.missionId = missionId;
         this.suiteRoomId = suiteRoomId;
         this.memberId = memberId;
         this.missionName = missionName;
-        this.missionDeadLine = getTimeStamp(missionDeadLine);
+        this.missionDeadLine = missionDeadLine;
         this.missionStatus = missionStatus;
-        this.result = result;
     }
 
     public Mission toMission() {
         return Mission.builder()
+                .missionId(this.missionId)
                 .suiteRoomId(this.suiteRoomId)
                 .memberId(this.memberId)
                 .missionName(this.missionName)
                 .missionDeadLine(this.missionDeadLine)
                 .missionStatus(this.missionStatus)
-                .result(this.result)
                 .build();
     }
 
@@ -56,11 +59,10 @@ public class MockMission {
                 .build();
     }
 
-    public static ReqMissionApprovalDto getReqMissionApprovalDto(String missionName, Long memberId) {
+    public static ReqMissionApprovalDto getReqMissionApprovalDto(Long suiteRoomId, Long missionId) {
         return ReqMissionApprovalDto.builder()
                 .suiteRoomId(1L)
-                .memberId(memberId)
-                .missionName(missionName)
+                .missionId(missionId)
                 .build();
     }
 
@@ -71,11 +73,14 @@ public class MockMission {
                 .build();
     }
 
-    private static Timestamp getTimeStamp(String time) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime localDateTime = LocalDateTime.parse(time, formatter);
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"));
-        return Timestamp.from(zonedDateTime.toInstant());
+    public static Mission newMission (Long memberId, MissionType missionType, String missionName, Timestamp missionDeadLine) {
+        return Mission.builder()
+                .suiteRoomId(1L)
+                .memberId(memberId)
+                .missionName(missionName)
+                .missionDeadLine(missionDeadLine)
+                .missionStatus(missionType)
+                .build();
     }
 
 }

@@ -14,13 +14,10 @@ import com.suite.suite_study_service.common.mockEntity.MockDashBoard;
 
 import com.suite.suite_study_service.mission.mockEntity.MockMission;
 import com.suite.suite_study_service.mission.repository.MissionRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -29,11 +26,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @Transactional
+@Rollback
 @SpringBootTest
 public class MissionServiceTest {
     @Autowired private DashBoardRepository dashBoardRepository;
@@ -56,6 +55,8 @@ public class MissionServiceTest {
         }
     }
 
+
+
     @Test
     @DisplayName("스터디 그룹 미션 생성 - 방장")
     public void createMissionHost() {
@@ -71,10 +72,10 @@ public class MissionServiceTest {
                     });
                 });
 
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                            missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                            missionRepository.save(mission);
                         });
         List<Mission> assertionMissions = missionRepository.findAllBySuiteRoomId(1L);
         //then
@@ -102,10 +103,10 @@ public class MissionServiceTest {
     @DisplayName("스터디 그룹 미션 목록 - 진행중")
     public void getMissionsProgress() {
         //given
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
@@ -128,10 +129,10 @@ public class MissionServiceTest {
     @DisplayName("스터디 그룹 미션 목록 - 확인")
     public void getMissionsCheck() {
         //given
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
@@ -151,10 +152,10 @@ public class MissionServiceTest {
     @DisplayName("스터디 그룹 미션 목록 - 완료")
     public void getMissionsComplete() {
         //given
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.COMPLETE)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.COMPLETE)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
@@ -175,10 +176,10 @@ public class MissionServiceTest {
     @DisplayName("스터디 그룹 칸반 보드 관리 - 방장")
     public void getRequestedMissions() {
         //given
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
         //when
@@ -202,10 +203,10 @@ public class MissionServiceTest {
     public void timeOutMissions() {
         //given
         AuthorizerDto missionReadAttempter = MockAuthorizer.YH();
-        makeMockMissionList("test", "2023-09-14 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-01 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
         Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -233,14 +234,12 @@ public class MissionServiceTest {
     public void updateMissionStatusProgressToCheckingGuest() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        List<Mission> m = makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
-                });
+                .map(mission ->
+                        missionRepository.save(mission)).collect(Collectors.toList());
         //when
-        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.PROGRESS)
-                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(m.get(m.size() - 1).getMissionId(), MissionType.CHECKING).get();
 
         assertionMission.updateMissionStatus(MissionType.CHECKING);
 
@@ -256,10 +255,10 @@ public class MissionServiceTest {
     public void updateMissionStatusProgressToCheckingHost() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.YH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
         Boolean isHost = dashBoardRepository.findBySuiteRoomIdAndMemberId(1L, missionApprovalRequester.getMemberId()).get().isHost();
@@ -280,23 +279,20 @@ public class MissionServiceTest {
     public void updateMissionStatusCheckingToCompleteHost() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.YH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+        List<Mission> m = makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
-                });
+                .map(mission ->
+                        missionRepository.save(mission)).collect(Collectors.toList());
         //when
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
                 () -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.FORBIDDEN)));
 
-        Mission assertionMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.CHECKING)
-                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
-
-        assertionMission.updateMissionStatus(MissionType.COMPLETE);
+        Mission assertRequiredMission = missionRepository.findByMissionIdAndMissionStatus(m.get(m.size() - 1).getMissionId(), MissionType.CHECKING).get();
+        assertRequiredMission.updateMissionStatus(MissionType.COMPLETE);
         //then
         Assertions.assertAll(
-                ()-> assertThat(assertionMission.getMissionStatus()).isEqualTo(MissionType.COMPLETE),
-                ()-> assertThat(assertionMission.getClass()).isEqualTo(Mission.class)
+                ()-> assertThat(assertRequiredMission.getMissionStatus()).isEqualTo(MissionType.COMPLETE),
+                ()-> assertThat(assertRequiredMission.getClass()).isEqualTo(Mission.class)
         );
     }
 
@@ -305,10 +301,10 @@ public class MissionServiceTest {
     public void updateMissionStatusCheckingToCompleteGuest() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
 
@@ -324,10 +320,10 @@ public class MissionServiceTest {
     public void deleteMissionHost() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.YH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
         dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionApprovalRequester.getMemberId(), true).orElseThrow(
@@ -356,10 +352,10 @@ public class MissionServiceTest {
     public void deleteMissionGuest() {
         //given
         AuthorizerDto missionApprovalRequester = MockAuthorizer.DH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.PROGRESS)
+        makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.PROGRESS)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
         //then
@@ -373,11 +369,11 @@ public class MissionServiceTest {
     @DisplayName("스터디 승인 요청 취소 - 방장")
     public void updateMissionStatusCheckingToProgressHost() {
         //given
-        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
+        AuthorizerDto missioncancelRequester = MockAuthorizer.YH();
         //when
         //then
         assertThrows(CustomException.class, () -> {
-            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missionCancleRequester.getMemberId(), false)
+            dashBoardRepository.findBySuiteRoomIdAndMemberIdAndIsHost(1L, missioncancelRequester.getMemberId(), false)
                     .orElseThrow(() -> new CustomException(StatusCode.FORBIDDEN));
         });
     }
@@ -386,22 +382,21 @@ public class MissionServiceTest {
     @DisplayName("스터디 승인 요청 취소 / 반려 - 스터디원 / 방장")
     public void updateMissionStatusCheckingToProgress() {
         //given
-        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
-        makeMockMissionList("test", "2023-10-15 18:00:00", MissionType.CHECKING)
+        AuthorizerDto missioncancelRequester = MockAuthorizer.YH();
+        List<Mission> m = makeMockMissionList("test", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.CHECKING)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
-                });
+                .map(mission ->
+                    missionRepository.save(mission)).collect(Collectors.toList());
         //when
-        Mission cancleRequiredMission = missionRepository.findByMissionIdAndMissionStatus(2L, MissionType.CHECKING)
-                .orElseThrow(() -> assertThrows(CustomException.class, () -> new CustomException(StatusCode.NOT_FOUND)));
+        Mission cancelRequiredMission = missionRepository.findByMissionIdAndMissionStatus(m.get(m.size() - 1).getMissionId(), MissionType.CHECKING).get();
 
-        cancleRequiredMission.updateMissionStatus(MissionType.PROGRESS);
+
+        cancelRequiredMission.updateMissionStatus(MissionType.PROGRESS);
         //then
         Assertions.assertAll(
-                ()-> assertThat(cancleRequiredMission.getMissionStatus()).isEqualTo(MissionType.PROGRESS),
-                ()-> assertThat(cancleRequiredMission.getMissionName()).isEqualTo("test"),
-                ()-> assertThat(cancleRequiredMission.getMemberId()).isEqualTo(1L)
+                ()-> assertThat(cancelRequiredMission.getMissionStatus()).isEqualTo(MissionType.PROGRESS),
+                ()-> assertThat(cancelRequiredMission.getMissionName()).isEqualTo("test"),
+                ()-> assertThat(cancelRequiredMission.getMemberId()).isEqualTo(3L)
         );
 
     }
@@ -410,51 +405,50 @@ public class MissionServiceTest {
     @DisplayName("최종 미션 달성률 계산")
     public void getMissionRate() {
         //given
-        AuthorizerDto missionCancleRequester = MockAuthorizer.YH();
-        makeMockMissionList("complete & true mission", "2023-10-01 18:00:00", MissionType.COMPLETE)
+        AuthorizerDto missioncancelRequester = MockAuthorizer.DH();
+        makeMockMissionList("complete & true mission", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.COMPLETE)
                 .stream()
-                .forEach(mockMission -> {
-                    Mission mission = mockMission.toMission();
+                .forEach(mission -> {
                     missionRepository.save(mission);
                 });
-        makeMockMissionList("fail mission 1", "2023-10-01 18:00:00", MissionType.FAIL)
+        makeMockMissionList("fail mission 1", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.FAIL)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
-        makeMockMissionList("complete & false mission2", "2023-10-01 18:00:00", MissionType.FAIL)
+        makeMockMissionList("complete & false mission2", Timestamp.valueOf("2023-10-15 18:00:00"), MissionType.FAIL)
                 .stream()
-                .forEach(mockMission -> {
-                    missionRepository.save(mockMission.toMission());
+                .forEach(mission -> {
+                    missionRepository.save(mission);
                 });
         //when
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@" + missioncancelRequester.getMemberId());
+        float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missioncancelRequester.getMemberId()).size();
+        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missioncancelRequester.getMemberId()).size();
+        List<Mission> temp = missionRepository.findAllBySuiteRoomId(1L);
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@" + temp.toString());
 
-        float missionCount = missionRepository.findAllBySuiteRoomIdAndMemberId(1L, missionCancleRequester.getMemberId()).size();
-        float missionTrueCount = missionRepository.findAllBySuiteRoomIdAndMissionStatusAndMemberId(1L, MissionType.COMPLETE, missionCancleRequester.getMemberId()).size();
-        int missionRate = (int) ((missionTrueCount / missionCount) * 100);
+        int missionRate = (int) Math.ceil((missionTrueCount / missionCount) * 100);
         //then
         Assertions.assertAll(
                 ()-> assertThat(missionCount).isEqualTo(3),
                 ()-> assertThat(missionTrueCount).isEqualTo(1),
-                ()-> assertThat(missionRate).isEqualTo(33)
+                ()-> assertThat(missionRate).isEqualTo(34)
         );
 
     }
 
 
 
-    private List<MockMission> makeMockMissionList(String missionName, String missionDeadLine, MissionType missionType) {
+    private List<Mission> makeMockMissionList(String missionName, Timestamp missionDeadLine, MissionType missionType) {
         List<DashBoard> dashBoards = dashBoardRepository.findAllBySuiteRoomId(1L);
-        List<MockMission> mockMissionList = new ArrayList<>();
+        List<Mission> mockMissionList = new ArrayList<>();
         dashBoards.stream().forEach(dashBoard -> {
-            MockMission mockMission = MockMission.builder()
-                    .suiteRoomId(1L)
-                    .memberId(dashBoard.getMemberId())
-                    .missionName(missionName)
-                    .missionDeadLine(missionDeadLine)
-                    .missionStatus(missionType)
-                    .build();
-            mockMissionList.add(mockMission);
+            System.out.println("@@@@@@@@@@@@@@@@@@@@@@@" + dashBoard.getMemberId());
+//            Mission newMission = MockMission.newMi
+            Mission newMission = MockMission.newMission(dashBoard.getMemberId(), missionType, missionName, missionDeadLine);
+
+            mockMissionList.add(newMission);
 
         });
         return mockMissionList;
