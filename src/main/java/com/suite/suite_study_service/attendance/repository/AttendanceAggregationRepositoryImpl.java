@@ -1,15 +1,16 @@
 package com.suite.suite_study_service.attendance.repository;
 
-import com.suite.suite_study_service.dashboard.dto.AttendanceRateDto;
-import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
 import com.suite.suite_study_service.attendance.dto.AttendanceBoardDto;
+import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
+import com.suite.suite_study_service.attendance.entity.Attendance;
+import com.suite.suite_study_service.dashboard.dto.AttendanceRateDto;
 import lombok.RequiredArgsConstructor;
+import org.bson.Document;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.bson.Document;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -139,7 +140,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     @Override
     public List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId) {
 
-        MatchOperation leaderMatch = match(
+        /*MatchOperation leaderMatch = match(
                 Criteria.where("memberId").is(leaderMemberId)
                         .and("suiteRoomId").is(suiteRoomId)
         );
@@ -175,23 +176,25 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
                 customLookupOperation,
                 customProjectDocOperation
         );
-        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceBoardDto.class).getMappedResults();
-        /*List<Attendance> leaderAttendances = mongoTemplate.find(Query.query(Criteria.where("memberId").is(leaderMemberId).and("suiteRoomId").is(suiteRoomId)), Attendance.class);
+        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceBoardDto.class).getMappedResults();*/
 
-        List<ResAttendanceBoardDto> myAttendanceStatusList = new ArrayList<>();
+
+        List<Attendance> leaderAttendances = mongoTemplate.find(Query.query(Criteria.where("memberId").is(leaderMemberId).and("suiteRoomId").is(suiteRoomId)), Attendance.class);
+
+        List<AttendanceBoardDto> myAttendanceStatusList = new ArrayList<>();
 
         for(Attendance leaderAttendance : leaderAttendances) {
             Attendance myAttendance = mongoTemplate.findOne(Query.query(Criteria.where("memberId").is(memberId).and("suiteRoomId").is(suiteRoomId)
                     .and("round").is(leaderAttendance.getRound())), Attendance.class);
-            ResAttendanceBoardDto resAttendanceBoardDto = ResAttendanceBoardDto.builder()
-                    .round(leaderAttendance.getRound())
-                    .suiteRoomId(suiteRoomId).build();
-            resAttendanceBoardDto.setAttendanceTime(myAttendance != null ? myAttendance.getAttendanceTime() : leaderAttendance.getAttendanceTime());
-            resAttendanceBoardDto.setStatus(myAttendance != null);
-            myAttendanceStatusList.add(resAttendanceBoardDto);
+            AttendanceBoardDto attendanceBoardDto = AttendanceBoardDto.builder()
+                    .suiteRoomId(suiteRoomId)
+                    .round(leaderAttendance.getRound()).build();
+            attendanceBoardDto.setAttendanceTime(myAttendance != null ? myAttendance.getAttendanceTime() : leaderAttendance.getAttendanceTime());
+
+            myAttendanceStatusList.add(attendanceBoardDto);
         }
 
-        return myAttendanceStatusList;*/
+        return myAttendanceStatusList;
     }
 
     /*
