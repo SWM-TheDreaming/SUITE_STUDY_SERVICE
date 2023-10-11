@@ -62,7 +62,7 @@ public class AttendanceServiceImpl implements AttendanceService {
         int attendanceCount = attendanceRepository.filterByGroupBySuiteRoomIdAndMemberId(suiteRoomId, memberId);
         List<AttendanceBoardDto> attendanceBoardDtoList = attendanceRepository.filterByGroupByMemberId(suiteRoomId, memberId, leader.getMemberId());
         return ResAttendanceBoardDto.builder()
-                .myAttendanceRate(Math.ceil(((double) attendanceCount / attendanceBoardDtoList.size()) * 100) / 100)
+                .myAttendanceRate(attendanceBoardDtoList.size() != 0 ? Math.ceil(((double) attendanceCount / attendanceBoardDtoList.size()) * 100) / 100 : 0)
                 .depositAmount(leader.getDepositAmount())
                 .attendanceBoardDtoList(attendanceBoardDtoList).build();
     }

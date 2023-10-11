@@ -2,7 +2,6 @@ package com.suite.suite_study_service.attendance.repository;
 
 import com.suite.suite_study_service.attendance.dto.AttendanceBoardDto;
 import com.suite.suite_study_service.attendance.dto.GroupOfAttendanceDto;
-import com.suite.suite_study_service.attendance.entity.Attendance;
 import com.suite.suite_study_service.dashboard.dto.AttendanceRateDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
@@ -10,9 +9,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
@@ -140,7 +141,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
     @Override
     public List<AttendanceBoardDto> filterByGroupByMemberId(Long suiteRoomId, Long memberId, Long leaderMemberId) {
 
-        /*MatchOperation leaderMatch = match(
+        MatchOperation leaderMatch = match(
                 Criteria.where("memberId").is(leaderMemberId)
                         .and("suiteRoomId").is(suiteRoomId)
         );
@@ -176,10 +177,10 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
                 customLookupOperation,
                 customProjectDocOperation
         );
-        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceBoardDto.class).getMappedResults();*/
+        return mongoTemplate.aggregate(aggregation, "attendance", AttendanceBoardDto.class).getMappedResults();
 
 
-        List<Attendance> leaderAttendances = mongoTemplate.find(Query.query(Criteria.where("memberId").is(leaderMemberId).and("suiteRoomId").is(suiteRoomId)), Attendance.class);
+        /*List<Attendance> leaderAttendances = mongoTemplate.find(Query.query(Criteria.where("memberId").is(leaderMemberId).and("suiteRoomId").is(suiteRoomId)), Attendance.class);
 
         List<AttendanceBoardDto> myAttendanceStatusList = new ArrayList<>();
 
@@ -194,7 +195,7 @@ public class AttendanceAggregationRepositoryImpl implements AttendanceAggregatio
             myAttendanceStatusList.add(attendanceBoardDto);
         }
 
-        return myAttendanceStatusList;
+        return myAttendanceStatusList;*/
     }
 
     /*
