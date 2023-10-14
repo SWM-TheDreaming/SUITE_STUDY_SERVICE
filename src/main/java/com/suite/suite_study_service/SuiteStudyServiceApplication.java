@@ -34,4 +34,6 @@ public class SuiteStudyServiceApplication {
         return new JPAQueryFactory(entityManager);
     }
 
+
+
 }
