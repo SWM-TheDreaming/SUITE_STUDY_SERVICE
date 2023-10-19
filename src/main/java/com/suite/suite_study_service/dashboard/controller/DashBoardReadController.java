@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashBoardReadController {
     private final DashBoardReadService dashBoardReadService;
 
-    @RequestMapping("/study-info/{memberId}")
+    @RequestMapping("/study/study-info/{memberId}")
     public ResponseEntity<ResDashBoardAvgDto> getStudyInfo(@PathVariable Long memberId) {
         return ResponseEntity.ok(dashBoardReadService.getMemberStudyAvgInfo(memberId));
     }
