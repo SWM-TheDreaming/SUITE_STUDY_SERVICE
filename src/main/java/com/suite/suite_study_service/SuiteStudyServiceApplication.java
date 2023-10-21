@@ -21,7 +21,6 @@ import javax.persistence.PersistenceContext;
         "com.suite.suite_study_service.mission"
 })
 @EnableMongoRepositories(basePackages = "com.suite.suite_study_service.attendance")
-@EntityScan(basePackages = {"com.suite.suite_study_service.mission.entity", "com.suite.suite_study_service.attendance.entity","com.suite.suite_study_service.dashboard.entity"})
 public class SuiteStudyServiceApplication {
 
     @PersistenceContext
