@@ -63,7 +63,11 @@ public class KafkaConfig {
 
     @Bean
     public SuiteRoomService suiteRoomService(RestTemplate restTemplate) {
+<<<<<<< HEAD
         String GET_SUITEROOMINFO_URI = "http://api.suitestudy.com/suiteroom/info/";
+=======
+        String GET_SUITEROOMINFO_URI = "http://bongu.suitestudy.com/suiteroom/info/";
+>>>>>>> main
         return new SuiteRoomService(GET_SUITEROOMINFO_URI, restTemplate);
     }
 
